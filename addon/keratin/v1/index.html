@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Cap·Actifs</title>
-        <link rel="icon" href="/addon/img/leaf.png" sizes="96x96">  
+<title>Cap·Actifs — Cure 120 jours (Agenda + Sauvegarde propre)</title>
 <style>
   :root{
-    --bg:#0b0f14;--panel:#121821;--panel2:#0f1726;--line:#1f2a3a;
+    --bg:#0b0f14;--panel:#121821;--line:#1f2a3a;
     --text:#e6edf3;--sub:#9fb2c7;--accent:#58a6ff;--ok:#22c55e;
     --radius:14px;--shadow:0 8px 24px rgba(0,0,0,.25);
   }
@@ -21,19 +20,17 @@
     font:500 15px/1.5 Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   }
   .wrap{max-width:1100px;margin:32px auto;padding:0 16px}
-
+  h1{font-size:22px;margin:0 0 8px}
   .top{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-bottom:16px}
   @media (max-width:960px){.top{grid-template-columns:1fr}}
-
   .card{background:linear-gradient(180deg,#121a27,#0f1520);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
   .inner{padding:16px 18px}
-  h1{font-size:22px;margin:0 0 8px}
 
   .legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
   .tag{font-size:12px;padding:6px 8px;border-radius:10px;border:1px solid #263750;background:#0f1726;color:#cfe1ff}
 
   .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
-  @media (max-width:640px){.controls{grid-template-columns:1fr}}
+  @media (max-width:720px){.controls{grid-template-columns:1fr}}
   label{display:block;font-size:12px;color:var(--sub);margin:0 0 6px}
   input[type=date],select,input[type=time],input[type=password]{width:100%;background:#0e1522;border:1px solid #233045;border-radius:12px;padding:10px;color:#e6edf3}
 
@@ -48,6 +45,23 @@
   .bar{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#58a6ff)}
   .stats{display:flex;gap:14px;margin-top:8px;font-size:13px;color:#9fb2c7}
 
+  /* Agenda */
+  .agenda .ag-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line)}
+  .agenda .title{font-weight:800}
+  .agenda .nav{display:flex;gap:6px}
+  .agenda .navbtn{width:30px;height:30px;border-radius:10px;background:#0f1726;border:1px solid #22324a;color:#cfe1ff;cursor:pointer}
+  .agenda .legend{display:flex;gap:10px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);color:#a9bed7;font-size:12px}
+  .agenda .grid{padding:10px}
+  .week{display:grid;grid-template-columns:28px repeat(7,1fr);gap:6px;margin-bottom:6px}
+  .wcell{display:flex;align-items:center;justify-content:center;font-size:10px;color:#9fb2c7}
+  .cell{height:28px;border-radius:9px;border:1px solid #22324a;background:#0e1522;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+  .cell.muted{opacity:.45}
+  .cell.sel{outline:2px solid #3b82f6;outline-offset:-2px}
+  .cell.ok{background:var(--ok);color:#03210f;border-color:#1a7b45}
+  .cell.disabled{opacity:.22;filter:grayscale(.6)}
+  .weeknum{font-size:10px;color:#8aa4be}
+
+  /* Phases */
   details.phase{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#0f1726,#0b1220);margin-bottom:12px}
   details.phase[open]{background:linear-gradient(180deg,#101a31,#0b1323)}
   .ph-summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
@@ -66,32 +80,24 @@
   .row.today{box-shadow:inset 0 0 0 2px #3b82f6}
   .row.done{background:linear-gradient(180deg,#0e1f15,#0b1611)}
 
-  /* Agenda compact */
-  .agenda .ag-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line)}
-  .agenda .title{font-weight:800}
-  .agenda .nav{display:flex;gap:6px}
-  .agenda .navbtn{width:30px;height:30px;border-radius:10px;background:#0f1726;border:1px solid #22324a;color:#cfe1ff;cursor:pointer}
-  .agenda .legend{display:flex;gap:10px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);color:#a9bed7;font-size:12px}
-  .agenda .grid{padding:10px 10px}
-  .week{display:grid;grid-template-columns:28px repeat(7,1fr);gap:6px;margin-bottom:6px}
-  .wcell{display:flex;align-items:center;justify-content:center;font-size:10px;color:#9fb2c7}
-  .cell{height:28px;border-radius:9px;border:1px solid #22324a;background:#0e1522;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;position:relative}
-  .cell.muted{opacity:.45}
-  .cell.sel{outline:2px solid #3b82f6;outline-offset:-2px}
-  .cell.ok{background:var(--ok);color:#03210f;border-color:#1a7b45}
-  .cell.disabled{opacity:.22;filter:grayscale(.6)}
-  .weeknum{font-size:10px;color:#8aa4be}
+  /* Collapse “Sauvegarde” propre */
+  details.save{margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#0f1726,#0b1220)}
+  details.save[open] .sv-body{padding-top:6px}
+  .sv-summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--line)}
+  .sv-summary::-webkit-details-marker{display:none}
+  .sv-ic{width:20px;height:20px;border-radius:6px;background:#0e1522;border:1px solid #22324a;display:flex;align-items:center;justify-content:center;color:#9fc1ff;font-weight:900}
+  .sv-body{padding:10px 14px 14px}
+  .savegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:720px){.savegrid{grid-template-columns:1fr}}
 
-  /* Bloc sauvegarde auto + chiffrement */
-  .savebox{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-  @media (max-width:640px){.savebox{grid-template-columns:1fr}}
-  .note{font-size:12px;color:#8fb0cf}
+  .note{font-size:12px;color:#8fb0cf;margin-top:6px}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <div class="top">
+    <!-- Colonne gauche -->
     <div class="card">
       <div class="inner">
         <h1>Suivi Cap·Actifs — 120 jours</h1>
@@ -118,45 +124,52 @@
           <input type="file" id="importFile" accept="application/json" style="display:none" />
         </div>
 
-        <!-- Sauvegarde auto + chiffrée -->
-        <div class="savebox">
-          <div>
-            <label style="display:flex;align-items:center;gap:8px">
-              <input type="checkbox" id="autoOn"> Activer la sauvegarde auto hebdo
-            </label>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <!-- Bloc SAUVEGARDE repliable -->
+        <details class="save" id="savePanel">
+          <summary class="sv-summary"><span class="sv-ic">＋</span><b>Sauvegarde / Sécurité</b><span style="color:#8fb0cf;font-size:12px;margin-left:8px">(auto-hebdo + export chiffré)</span></summary>
+          <div class="sv-body">
+            <div class="savegrid">
               <div>
-                <label for="autoDay">Jour</label>
-                <select id="autoDay">
-                  <option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option>
-                  <option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="0">Dimanche</option>
-                </select>
+                <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <input type="checkbox" id="autoOn"> Activer la sauvegarde auto hebdo
+                </label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <div>
+                    <label for="autoDay">Jour</label>
+                    <select id="autoDay">
+                      <option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option>
+                      <option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option>
+                      <option value="0">Dimanche</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="autoTime">Heure</label>
+                    <input type="time" id="autoTime" value="10:00">
+                  </div>
+                </div>
+                <div class="note" id="autoInfo">Sauvegarde hebdo désactivée.</div>
               </div>
-              <div>
-                <label for="autoTime">Heure</label>
-                <input type="time" id="autoTime" value="10:00">
-              </div>
-            </div>
-            <div class="note" id="autoInfo">Sauvegarde hebdo désactivée.</div>
-          </div>
 
-          <div>
-            <label>Export/Import chiffrés (AES-GCM)</label>
-            <input type="password" id="pass" placeholder="Phrase-clé (au choix)" />
-            <div class="actions" style="justify-content:flex-start;margin-top:8px">
-              <button class="btn ghost" id="expEnc">Exporter chiffré</button>
-              <button class="btn ghost" id="impEnc">Importer chiffré</button>
-              <input type="file" id="impEncFile" accept=".enc,application/octet-stream" style="display:none" />
+              <div>
+                <label>Export/Import chiffrés (AES-GCM)</label>
+                <input type="password" id="pass" placeholder="Phrase-clé (au choix)" />
+                <div class="actions" style="justify-content:flex-start;margin-top:8px">
+                  <button class="btn ghost" id="expEnc">Exporter chiffré</button>
+                  <button class="btn ghost" id="impEnc">Importer chiffré</button>
+                  <input type="file" id="impEncFile" accept=".enc,application/octet-stream" style="display:none" />
+                </div>
+                <div class="note">La phrase-clé ne quitte jamais ton navigateur.</div>
+              </div>
             </div>
-            <div class="note">Ta phrase-clé ne quitte jamais ton navigateur.</div>
           </div>
-        </div>
+        </details>
 
         <div class="progress" title="Progression"><div class="bar" id="bar"></div></div>
         <div class="stats" id="stats"></div>
       </div>
     </div>
 
+    <!-- Colonne droite : Agenda -->
     <div class="card agenda">
       <div class="ag-head">
         <div class="title" id="agTitle">Agenda</div>
@@ -176,14 +189,16 @@
     </div>
   </div>
 
+  <!-- Phases -->
   <div id="phases"></div>
 </div>
 
 <script>
 (function(){
-  const SCHEMA_VERSION = 2;
-  const KEY = 'capactifs_cure_v7';
+  const SCHEMA_VERSION = 3;
+  const KEY = 'capactifs_cure_v9';
   const KEY_SETTINGS = KEY+'_settings';
+
   const plan = [
     { name:'P1 Attaque', dose:2, days:15, color:'#6aa6ff' },
     { name:'P2 Attaque', dose:3, days:30, color:'#7be495' },
@@ -192,7 +207,7 @@
   ];
   const totalDays = plan.reduce((a,p)=>a+p.days,0);
 
-  // ----- Utils dates -----
+  /* ---------- Dates ---------- */
   function normalizeDate(input){
     if(typeof input !== 'string') return null;
     let m = input.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -207,22 +222,23 @@
   }
   const pad = n=>String(n).padStart(2,'0');
 
-  // ----- Elements -----
-  const E = id => document.getElementById(id);
+  /* ---------- Els ---------- */
+  const $ = id => document.getElementById(id);
   const els = {
-    legend: E('legend'), phases: E('phases'),
-    start: E('start'), pickDay: E('pickDay'),
-    validateSelected: E('validateSelected'), validateToday: E('validateToday'), reset: E('reset'),
-    exportBtn: E('exportBtn'), importBtn: E('importBtn'), importFile: E('importFile'),
-    bar: E('bar'), stats: E('stats'),
-    agenda: E('agenda'), agTitle: E('agTitle'), prevM: E('prevM'), todayM: E('todayM'), nextM: E('nextM'),
-    autoOn: E('autoOn'), autoDay: E('autoDay'), autoTime: E('autoTime'), autoInfo: E('autoInfo'),
-    pass: E('pass'), expEnc: E('expEnc'), impEnc: E('impEnc'), impEncFile: E('impEncFile'),
+    legend: $('legend'), phases: $('phases'),
+    start: $('start'), pickDay: $('pickDay'),
+    validateSelected: $('validateSelected'), validateToday: $('validateToday'), reset: $('reset'),
+    exportBtn: $('exportBtn'), importBtn: $('importBtn'), importFile: $('importFile'),
+    bar: $('bar'), stats: $('stats'),
+    agenda: $('agenda'), agTitle: $('agTitle'), prevM: $('prevM'), todayM: $('todayM'), nextM: $('nextM'),
+    autoOn: $('autoOn'), autoDay: $('autoDay'), autoTime: $('autoTime'), autoInfo: $('autoInfo'),
+    pass: $('pass'), expEnc: $('expEnc'), impEnc: $('impEnc'), impEncFile: $('impEncFile'),
   };
 
-  // ----- State -----
+  /* ---------- State ---------- */
   let state = migrate(load(KEY)) || defaultState();
   let settings = load(KEY_SETTINGS) || { auto:false, day:1, time:'10:00', lastAutoBackup:null };
+  let autoRunningThisSession = false; // anti-rebond dans l’onglet
 
   function defaultState(){
     const t = new Date(); const iso = t.toISOString().slice(0,10);
@@ -233,26 +249,25 @@
   function load(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
   function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
   function saveSettings(){ localStorage.setItem(KEY_SETTINGS, JSON.stringify(settings)); }
-
   function migrate(data){
     if(!data||typeof data!=='object') return null;
     const iso = normalizeDate(data.startDate); if(!iso) return null;
     data.startDate = iso;
-    if(!Array.isArray(data.days) || data.days.length!==totalDays)
+    if(!Array.isArray(data.days)||data.days.length!==totalDays)
       data.days = Array.from({length:totalDays}, _=>({done:false, ts:null}));
     if(typeof data.selectedDay!=='number') data.selectedDay=1;
     if(typeof data.calYear!=='number'||typeof data.calMonth!=='number'){ const t=new Date(); data.calYear=t.getFullYear(); data.calMonth=t.getMonth(); }
     data._schema = SCHEMA_VERSION; return data;
   }
 
-  // ----- UI legend -----
+  /* ---------- Legend ---------- */
   plan.forEach(p=>{
     const d = document.createElement('div'); d.className='tag';
     d.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${p.color};margin-right:6px"></span>${p.name} — ${p.dose} gél./j · ${p.days} j`;
     els.legend.appendChild(d);
   });
 
-  // ----- Inputs -----
+  /* ---------- Inputs ---------- */
   els.start.value = state.startDate;
   els.start.addEventListener('change', ()=>{
     const iso = normalizeDate(els.start.value) || normalizeDate(els.start.value.split('-').reverse().join('/'));
@@ -261,7 +276,11 @@
   });
   els.pickDay.addEventListener('change', ()=>{ state.selectedDay = parseInt(els.pickDay.value,10); save(); renderAll(); });
 
-  // ----- Buttons -----
+  /* ---------- Actions ---------- */
+  function markDone(idx){ const i=idx-1; if(i<0||i>=state.days.length) return;
+    if(!state.days[i].done){ state.days[i].done = true; state.days[i].ts = Date.now(); }
+    save(); renderAll();
+  }
   els.validateSelected.addEventListener('click',()=> markDone(state.selectedDay));
   els.validateToday.addEventListener('click',()=>{
     const idx = dayIndexFromDate(new Date());
@@ -272,119 +291,12 @@
     if(confirm('Réinitialiser toute la cure ?')){ state = defaultState(); els.start.value = state.startDate; save(); renderAll(); }
   });
 
-  // Export / Import
+  /* ---------- Export / Import JSON ---------- */
   els.exportBtn.addEventListener('click', exportData);
   els.importBtn.addEventListener('click', ()=> els.importFile.click());
   els.importFile.addEventListener('change', handleImportFile);
 
-  // ----- Auto backup -----
-  els.autoOn.checked = !!settings.auto;
-  els.autoDay.value = String(settings.day ?? 1);
-  els.autoTime.value = settings.time || '10:00';
-  updateAutoInfo();
-
-  els.autoOn.addEventListener('change', ()=>{ settings.auto = els.autoOn.checked; saveSettings(); updateAutoInfo(); });
-  els.autoDay.addEventListener('change', ()=>{ settings.day = parseInt(els.autoDay.value,10); saveSettings(); updateAutoInfo(); });
-  els.autoTime.addEventListener('change', ()=>{ settings.time = els.autoTime.value; saveSettings(); updateAutoInfo(); });
-
-  // Check every minute when the page is open
-  setInterval(checkAutoBackup, 60*1000);
-  // also check once at load
-  setTimeout(checkAutoBackup, 1500);
-
-  function updateAutoInfo(){
-    if(!settings.auto){ els.autoInfo.textContent = 'Sauvegarde hebdo désactivée.'; return; }
-    els.autoInfo.textContent = `Sauvegarde auto : ${labelDay(settings.day)} à ${settings.time}` + (settings.lastAutoBackup?` — dernière : ${new Date(settings.lastAutoBackup).toLocaleString('fr-FR')}`:'');
-  }
-  function labelDay(n){ return ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][n]; }
-  function checkAutoBackup(){
-    if(!settings.auto) return;
-    const now = new Date();
-    // prochain créneau cette semaine
-    const [hh,mm] = (settings.time||'10:00').split(':').map(x=>+x);
-    const target = new Date(now);
-    const dow = now.getDay(); // 0..6
-    let delta = (settings.day - dow); if(delta<0) delta += 7;
-    target.setDate(now.getDate()+delta); target.setHours(hh,mm,0,0);
-    // si on est déjà passé aujourd'hui et on est au bon jour → prendre aujourd’hui
-    if(delta===0 && now.getTime() > target.getTime()) target.setDate(target.getDate()+7);
-    // on veut déclencher si "le créneau de la semaine courante" vient d’être atteint et pas encore fait
-    const weekKey = weekStamp(target);
-    const already = settings.lastAutoBackup && weekStamp(new Date(settings.lastAutoBackup))===weekKey;
-    if(already) return;
-    // Si on est après l'heure et le jour (ou pile dessus), on déclenche
-    const thisWeekSlot = new Date(target); thisWeekSlot.setDate(target.getDate()-7); // slot précédent
-    const slot = new Date(target); slot.setDate(target.getDate()-7); // (placeholder non utilisé)
-    const shouldRun =
-      (now.getDay()===settings.day && now.getHours()===hh && now.getMinutes()>=mm) ||
-      (now.getDay()>settings.day); // si tu ouvres plus tard dans la semaine, on exporte quand même
-    if(shouldRun){
-      exportData(true); // true = mark as auto
-      settings.lastAutoBackup = Date.now();
-      saveSettings(); updateAutoInfo();
-    }
-  }
-  function weekStamp(date){ // YYYY-Www
-    const d=new Date(date); d.setHours(0,0,0,0);
-    const t = new Date(d.getTime());
-    const dayNum = (t.getDay()||7); t.setDate(t.getDate()+4-dayNum);
-    const yearStart = new Date(t.getFullYear(),0,1);
-    const week = Math.ceil((((t - yearStart) / 86400000) + 1)/7);
-    return `${t.getFullYear()}-W${pad(week)}`;
-  }
-
-  // ----- Crypto helpers (AES-GCM + PBKDF2) -----
-  async function deriveKey(pass){
-    const enc = new TextEncoder();
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const baseKey = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
-    const key = await crypto.subtle.deriveKey(
-      { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
-      baseKey,
-      { name:'AES-GCM', length:256 },
-      false,
-      ['encrypt','decrypt']
-    );
-    return {key, salt};
-  }
-  async function deriveKeyFromSalt(pass, salt){
-    const enc = new TextEncoder();
-    const baseKey = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
-    const key = await crypto.subtle.deriveKey(
-      { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
-      baseKey,
-      { name:'AES-GCM', length:256 },
-      false,
-      ['encrypt','decrypt']
-    );
-    return key;
-  }
-  async function encryptJson(pass, obj){
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const {key, salt} = await deriveKey(pass);
-    const data = new TextEncoder().encode(JSON.stringify(obj));
-    const ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, data));
-    // format: magic|salt(16)|iv(12)|cipher
-    const magic = new TextEncoder().encode('CAPACTV1');
-    const out = new Uint8Array(magic.length+16+12+ct.length);
-    out.set(magic,0); out.set(salt,magic.length); out.set(iv,magic.length+16); out.set(ct,magic.length+16+12);
-    return out;
-  }
-  async function decryptJson(pass, buf){
-    const u8 = new Uint8Array(buf);
-    const magic = new TextDecoder().decode(u8.slice(0,8));
-    if(magic!=='CAPACTV1') throw new Error('Format inconnu');
-    const salt = u8.slice(8,24);
-    const iv = u8.slice(24,36);
-    const ct = u8.slice(36);
-    const key = await deriveKeyFromSalt(pass, salt);
-    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, ct);
-    return JSON.parse(new TextDecoder().decode(new Uint8Array(pt)));
-  }
-
-  // ----- Export / Import JSON -----
   function exportData(isAuto=false){
-    // force ISO
     state.startDate = normalizeDate(state.startDate) || state.startDate;
     const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
     const a = document.createElement('a');
@@ -399,47 +311,62 @@
     rd.onload = ()=>{
       try{
         const data = JSON.parse(rd.result);
-        if(!validateSchema(data).ok) return alert('Fichier invalide.');
-        const iso = normalizeDate(data.startDate);
-        const go = confirm(`Importer ?\nDébut: ${iso}\nValidés: ${data.days.filter(x=>x.done).length}/${totalDays}`);
-        if(!go) return;
-        data.startDate = iso;
+        if(!normalizeDate(data.startDate) || !Array.isArray(data.days) || data.days.length!==totalDays){ alert('Fichier invalide.'); return; }
+        data.startDate = normalizeDate(data.startDate);
         state = migrate(data) || defaultState(); save(); renderAll();
       }catch(e){ alert('JSON illisible.'); }
     };
     rd.readAsText(file,'utf-8');
   }
-  function validateSchema(d){
-    if(typeof d!=='object'||!d) return {ok:false};
-    if(!normalizeDate(d.startDate)) return {ok:false};
-    if(typeof d.selectedDay!=='number') return {ok:false};
-    if(!Array.isArray(d.days)||d.days.length!==totalDays) return {ok:false};
-    return {ok:true};
-  }
 
-  // ----- Export / Import CHIFFRÉ -----
+  /* ---------- Export / Import CHIFFRÉ ---------- */
+  async function deriveKey(pass, saltOpt){
+    const enc = new TextEncoder();
+    const salt = saltOpt || crypto.getRandomValues(new Uint8Array(16));
+    const baseKey = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey(
+      { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
+      baseKey, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
+    );
+    return {key, salt};
+  }
+  async function encryptJson(pass, obj){
+    const {key, salt} = await deriveKey(pass);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const data = new TextEncoder().encode(JSON.stringify(obj));
+    const ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, data));
+    const magic = new TextEncoder().encode('CAPACTV1');
+    const out = new Uint8Array(magic.length+16+12+ct.length);
+    out.set(magic,0); out.set(salt,8); out.set(iv,24); out.set(ct,36);
+    return out;
+  }
+  async function decryptJson(pass, buf){
+    const u8 = new Uint8Array(buf);
+    if(new TextDecoder().decode(u8.slice(0,8))!=='CAPACTV1') throw new Error('format');
+    const salt = u8.slice(8,24), iv=u8.slice(24,36), ct=u8.slice(36);
+    const {key} = await deriveKey(pass, salt);
+    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, ct);
+    return JSON.parse(new TextDecoder().decode(new Uint8Array(pt)));
+  }
   els.expEnc.addEventListener('click', async ()=>{
-    const pass = els.pass.value.trim();
-    if(pass.length<6){ alert('Choisis une phrase-clé d’au moins 6 caractères.'); return; }
+    const pass = els.pass.value.trim(); if(pass.length<6){ alert('Phrase-clé ≥ 6 caractères'); return; }
     state.startDate = normalizeDate(state.startDate) || state.startDate;
     const bytes = await encryptJson(pass, state);
     const a = document.createElement('a');
     const now = new Date();
-    const blob = new Blob([bytes], {type:'application/octet-stream'});
-    a.href = URL.createObjectURL(blob);
+    a.href = URL.createObjectURL(new Blob([bytes], {type:'application/octet-stream'}));
     a.download = `capactifs_backup_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}h${pad(now.getMinutes())}.enc`;
     document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
   });
-
   els.impEnc.addEventListener('click', ()=> els.impEncFile.click());
-  els.impEncFile.addEventListener('change', async (ev)=>{
+  els.impEncFile.addEventListener('change', async ev=>{
     const file = ev.target.files[0]; ev.target.value=''; if(!file) return;
-    const pass = els.pass.value.trim(); if(pass.length<6){ alert('Entre la phrase-clé utilisée à l’export.'); return; }
+    const pass = els.pass.value.trim(); if(pass.length<6){ alert('Entre la phrase-clé.'); return; }
     const rd = new FileReader();
     rd.onload = async ()=>{
       try{
         const data = await decryptJson(pass, rd.result);
-        if(!validateSchema(data).ok) return alert('Fichier déchiffré invalide.');
+        if(!normalizeDate(data.startDate) || !Array.isArray(data.days) || data.days.length!==totalDays){ alert('Sauvegarde invalide.'); return; }
         data.startDate = normalizeDate(data.startDate);
         state = migrate(data) || defaultState(); save(); renderAll();
       }catch(e){ alert('Clé incorrecte ou fichier corrompu.'); }
@@ -447,7 +374,62 @@
     rd.readAsArrayBuffer(file);
   });
 
-  // ----- Helpers -----
+  /* ---------- Auto-backup (fix “toutes les minutes”) ---------- */
+  els.autoOn.checked = !!settings.auto;
+  els.autoDay.value = String(settings.day ?? 1);
+  els.autoTime.value = settings.time || '10:00';
+  updateAutoInfo();
+
+  els.autoOn.addEventListener('change', ()=>{ settings.auto = els.autoOn.checked; saveSettings(); updateAutoInfo(); });
+  els.autoDay.addEventListener('change', ()=>{ settings.day = parseInt(els.autoDay.value,10); saveSettings(); updateAutoInfo(); });
+  els.autoTime.addEventListener('change', ()=>{ settings.time = els.autoTime.value; saveSettings(); updateAutoInfo(); });
+
+  // Vérif 1x/min, + une vérif au chargement
+  setInterval(checkAutoBackup, 60*1000);
+  setTimeout(checkAutoBackup, 1500);
+
+  function labelDay(n){ return ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][n]; }
+  function updateAutoInfo(){
+    if(!settings.auto){ els.autoInfo.textContent = 'Sauvegarde hebdo désactivée.'; return; }
+    els.autoInfo.textContent = `Sauvegarde auto : ${labelDay(settings.day)} à ${settings.time}` + (settings.lastAutoBackup?` — dernière : ${new Date(settings.lastAutoBackup).toLocaleString('fr-FR')}`:'');
+  }
+  function weekStamp(date){ // ISO semaine
+    const d=new Date(date); d.setHours(0,0,0,0);
+    const t=new Date(d); const day=(t.getDay()||7); t.setDate(t.getDate()+4-day);
+    const yearStart=new Date(t.getFullYear(),0,1);
+    const week=Math.ceil((((t-yearStart)/86400000)+1)/7);
+    return `${t.getFullYear()}-W${pad(week)}`;
+  }
+  function slotThisWeek(now){
+    // construit le créneau de cette semaine (lundi=1 … dimanche=0)
+    const [hh,mm] = (settings.time||'10:00').split(':').map(x=>+x);
+    // trouve le lundi de la semaine (ISO) :
+    const d = new Date(now); d.setHours(0,0,0,0);
+    const day = (d.getDay()||7); // 1..7
+    const monday = new Date(d); monday.setDate(d.getDate() - (day-1));
+    // cible = monday + (settings.day-1) jours (avec Dimanche=0 → +6)
+    const offset = (settings.day===0)?6:(settings.day-1);
+    const slot = new Date(monday); slot.setDate(monday.getDate()+offset); slot.setHours(hh,mm,0,0);
+    return slot;
+  }
+  function checkAutoBackup(){
+    if(!settings.auto || autoRunningThisSession) return;
+    const now = new Date();
+    const currentWeek = weekStamp(now);
+    const lastWeek = settings.lastAutoBackup ? weekStamp(new Date(settings.lastAutoBackup)) : null;
+    if(lastWeek === currentWeek) return; // déjà fait cette semaine
+
+    const slot = slotThisWeek(now);
+    if(now >= slot){
+      autoRunningThisSession = true;           // anti-rebond onglet
+      exportData(true);
+      settings.lastAutoBackup = Date.now();
+      saveSettings(); updateAutoInfo();
+      setTimeout(()=>{ autoRunningThisSession = false; }, 2000);
+    }
+  }
+
+  /* ---------- Agenda & Phases ---------- */
   function phaseIdxForDay(idx){ let n=idx,i=0; for(const p of plan){ if(n<=p.days) return i; n-=p.days; i++; } return 0; }
   function dateForIndex(idx){
     const start = new Date(state.startDate+'T00:00:00');
@@ -471,7 +453,6 @@
     return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
   }
 
-  // ----- Renders -----
   function populateSelect(){
     els.pickDay.innerHTML = '';
     for(let i=1;i<=totalDays;i++){
@@ -482,18 +463,12 @@
     els.pickDay.value = state.selectedDay;
   }
 
-  function markDone(idx){
-    const i = idx-1; if(i<0||i>=state.days.length) return;
-    if(!state.days[i].done){ state.days[i].done = true; state.days[i].ts = Date.now(); }
-    save(); renderAll();
-  }
-
   function renderPhases(){
-    els.phases.innerHTML = '';
+    $('phases').innerHTML = '';
     let cursor = 1;
     plan.forEach((p,pi)=>{
       const details = document.createElement('details');
-      details.className='phase'; details.id='phase_'+pi; details.open=(pi===0);
+      details.className='phase'; details.id='phase_'+pi; details.open=(pi===phaseIdxForDay(state.selectedDay));
       const sum = document.createElement('summary');
       sum.className='ph-summary';
       sum.innerHTML = `<div class="dot" style="background:${p.color}"></div>
@@ -515,7 +490,7 @@
         body.appendChild(row); cursor++;
       }
       details.appendChild(body);
-      els.phases.appendChild(details);
+      $('phases').appendChild(details);
       details.addEventListener('toggle', ()=>{ if(details.open){ document.querySelectorAll('details.phase').forEach(d=>{ if(d!==details) d.open=false; }); }});
     });
   }
@@ -523,15 +498,16 @@
   function renderProgress(){
     const done = state.days.filter(d=>d.done).length;
     const pct = Math.round((done/totalDays)*100);
-    els.bar.style.width = pct+'%';
-    els.stats.innerHTML = `<div><b>${done}/${totalDays}</b> jours validés</div><div>${pct}% complété</div>`;
+    $('bar').style.width = pct+'%';
+    $('stats').innerHTML = `<div><b>${done}/${totalDays}</b> jours validés</div><div>${pct}% complété</div>`;
   }
 
   function renderAgenda(){
     const y = state.calYear, m = state.calMonth;
     els.agTitle.textContent = `${new Date(y,m,1).toLocaleDateString('fr-FR',{month:'long', year:'numeric'})}`;
 
-    const head = document.createElement('div'); head.className = 'week';
+    const head = document.createElement('div');
+    head.className = 'week';
     const h0 = document.createElement('div'); h0.className='wcell'; h0.textContent='#'; head.appendChild(h0);
     ['L','M','M','J','V','S','D'].forEach(d=>{ const c=document.createElement('div'); c.className='wcell'; c.textContent=d; head.appendChild(c); });
 
@@ -565,9 +541,13 @@
 
   function renderAll(){ populateSelect(); renderPhases(); renderProgress(); renderAgenda(); }
 
+  // Nav agenda
+  els.prevM.addEventListener('click', ()=>{ state.calMonth--; if(state.calMonth<0){ state.calMonth=11; state.calYear--; } save(); renderAgenda(); });
+  els.nextM.addEventListener('click', ()=>{ state.calMonth++; if(state.calMonth>11){ state.calMonth=0; state.calYear++; } save(); renderAgenda(); });
+  els.todayM.addEventListener('click', ()=>{ const t=new Date(); state.calYear=t.getFullYear(); state.calMonth=t.getMonth(); save(); renderAgenda(); });
+
   // Init
   renderAll();
-
 })();
 </script>
 </body>
