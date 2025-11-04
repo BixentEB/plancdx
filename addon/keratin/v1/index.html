@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cap·Actifs</title>
-    <link rel="icon" href="/addon/img/leaf.png" sizes="96x96">  
+        <link rel="icon" href="/addon/img/leaf.png" sizes="96x96">  
 <style>
   :root{
     --bg:#0b0f14;--panel:#121821;--panel2:#0f1726;--line:#1f2a3a;
@@ -35,7 +35,7 @@
   .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
   @media (max-width:640px){.controls{grid-template-columns:1fr}}
   label{display:block;font-size:12px;color:var(--sub);margin:0 0 6px}
-  input[type=date],select{width:100%;background:#0e1522;border:1px solid #233045;border-radius:12px;padding:10px;color:#e6edf3}
+  input[type=date],select,input[type=time],input[type=password]{width:100%;background:#0e1522;border:1px solid #233045;border-radius:12px;padding:10px;color:#e6edf3}
 
   .actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
   .btn{appearance:none;border:none;border-radius:12px;padding:11px 14px;font-weight:700;letter-spacing:.2px;cursor:pointer}
@@ -54,7 +54,6 @@
   .ph-summary::-webkit-details-marker{display:none}
   .dot{width:10px;height:10px;border-radius:3px}
   .ph-body{padding:6px 0}
-
   .row{display:grid;grid-template-columns:90px 1fr 170px 110px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid #142033}
   .row:last-child{border-bottom:none}
   .pill{font-size:11px;padding:3px 8px;border-radius:999px;background:#1a2740;color:#a8c2df;border:1px solid #2a3b5a;display:inline-block}
@@ -67,6 +66,7 @@
   .row.today{box-shadow:inset 0 0 0 2px #3b82f6}
   .row.done{background:linear-gradient(180deg,#0e1f15,#0b1611)}
 
+  /* Agenda compact */
   .agenda .ag-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line)}
   .agenda .title{font-weight:800}
   .agenda .nav{display:flex;gap:6px}
@@ -82,7 +82,10 @@
   .cell.disabled{opacity:.22;filter:grayscale(.6)}
   .weeknum{font-size:10px;color:#8aa4be}
 
-  .foot{margin:10px 0 4px;text-align:center;color:#7790a8;font-size:12px}
+  /* Bloc sauvegarde auto + chiffrement */
+  .savebox{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  @media (max-width:640px){.savebox{grid-template-columns:1fr}}
+  .note{font-size:12px;color:#8fb0cf}
 </style>
 </head>
 <body>
@@ -115,9 +118,41 @@
           <input type="file" id="importFile" accept="application/json" style="display:none" />
         </div>
 
-        <div class="progress" title="Progression">
-          <div class="bar" id="bar"></div>
+        <!-- Sauvegarde auto + chiffrée -->
+        <div class="savebox">
+          <div>
+            <label style="display:flex;align-items:center;gap:8px">
+              <input type="checkbox" id="autoOn"> Activer la sauvegarde auto hebdo
+            </label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+              <div>
+                <label for="autoDay">Jour</label>
+                <select id="autoDay">
+                  <option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option>
+                  <option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="0">Dimanche</option>
+                </select>
+              </div>
+              <div>
+                <label for="autoTime">Heure</label>
+                <input type="time" id="autoTime" value="10:00">
+              </div>
+            </div>
+            <div class="note" id="autoInfo">Sauvegarde hebdo désactivée.</div>
+          </div>
+
+          <div>
+            <label>Export/Import chiffrés (AES-GCM)</label>
+            <input type="password" id="pass" placeholder="Phrase-clé (au choix)" />
+            <div class="actions" style="justify-content:flex-start;margin-top:8px">
+              <button class="btn ghost" id="expEnc">Exporter chiffré</button>
+              <button class="btn ghost" id="impEnc">Importer chiffré</button>
+              <input type="file" id="impEncFile" accept=".enc,application/octet-stream" style="display:none" />
+            </div>
+            <div class="note">Ta phrase-clé ne quitte jamais ton navigateur.</div>
+          </div>
         </div>
+
+        <div class="progress" title="Progression"><div class="bar" id="bar"></div></div>
         <div class="stats" id="stats"></div>
       </div>
     </div>
@@ -142,14 +177,13 @@
   </div>
 
   <div id="phases"></div>
-
-  <div class="foot">Export/Import robustes — formats de date ISO et FR acceptés, toujours normalisés en ISO.</div>
 </div>
 
 <script>
 (function(){
-  const SCHEMA_VERSION = 2;                 // ⇦ bump version
-  const KEY = 'capactifs_cure_v6';          // ⇦ nouvelle clé (pour éviter l’ancien état durant test)
+  const SCHEMA_VERSION = 2;
+  const KEY = 'capactifs_cure_v7';
+  const KEY_SETTINGS = KEY+'_settings';
   const plan = [
     { name:'P1 Attaque', dose:2, days:15, color:'#6aa6ff' },
     { name:'P2 Attaque', dose:3, days:30, color:'#7be495' },
@@ -158,178 +192,270 @@
   ];
   const totalDays = plan.reduce((a,p)=>a+p.days,0);
 
-  // --- Utils: date normalization ---
+  // ----- Utils dates -----
   function normalizeDate(input){
     if(typeof input !== 'string') return null;
-    // ISO: YYYY-MM-DD
-    const iso = input.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if(iso){
-      const y=+iso[1], m=+iso[2], d=+iso[3];
-      if(y<2000 || y>2100) return null;
-      const dt = new Date(Date.UTC(y,m-1,d));
-      if(dt.getUTCMonth()+1!==m || dt.getUTCDate()!==d) return null;
-      return `${y.toString().padStart(4,'0')}-${iso[2]}-${iso[3]}`;
-    }
-    // FR: DD/MM/YYYY
-    const fr = input.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if(fr){
-      const d=+fr[1], m=+fr[2], y=+fr[3];
-      if(y<2000 || y>2100) return null;
-      const dt = new Date(Date.UTC(y,m-1,d));
-      if(dt.getUTCMonth()+1!==m || dt.getUTCDate()!==d) return null;
-      return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    }
+    let m = input.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(m){ const y=+m[1], mo=+m[2], d=+m[3]; if(y<2000||y>2100) return null;
+      const dt=new Date(Date.UTC(y,mo-1,d)); if(dt.getUTCMonth()+1!==mo||dt.getUTCDate()!==d) return null;
+      return `${y}-${m[2]}-${m[3]}`; }
+    m = input.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if(m){ const d=+m[1], mo=+m[2], y=+m[3]; if(y<2000||y>2100) return null;
+      const dt=new Date(Date.UTC(y,mo-1,d)); if(dt.getUTCMonth()+1!==mo||dt.getUTCDate()!==d) return null;
+      return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
     return null;
   }
+  const pad = n=>String(n).padStart(2,'0');
 
-  // --- Elements ---
+  // ----- Elements -----
+  const E = id => document.getElementById(id);
   const els = {
-    legend: document.getElementById('legend'),
-    phases: document.getElementById('phases'),
-    start: document.getElementById('start'),
-    pickDay: document.getElementById('pickDay'),
-    validateSelected: document.getElementById('validateSelected'),
-    validateToday: document.getElementById('validateToday'),
-    reset: document.getElementById('reset'),
-    exportBtn: document.getElementById('exportBtn'),
-    importBtn: document.getElementById('importBtn'),
-    importFile: document.getElementById('importFile'),
-    bar: document.getElementById('bar'),
-    stats: document.getElementById('stats'),
-    agenda: document.getElementById('agenda'),
-    agTitle: document.getElementById('agTitle'),
-    prevM: document.getElementById('prevM'),
-    todayM: document.getElementById('todayM'),
-    nextM: document.getElementById('nextM')
+    legend: E('legend'), phases: E('phases'),
+    start: E('start'), pickDay: E('pickDay'),
+    validateSelected: E('validateSelected'), validateToday: E('validateToday'), reset: E('reset'),
+    exportBtn: E('exportBtn'), importBtn: E('importBtn'), importFile: E('importFile'),
+    bar: E('bar'), stats: E('stats'),
+    agenda: E('agenda'), agTitle: E('agTitle'), prevM: E('prevM'), todayM: E('todayM'), nextM: E('nextM'),
+    autoOn: E('autoOn'), autoDay: E('autoDay'), autoTime: E('autoTime'), autoInfo: E('autoInfo'),
+    pass: E('pass'), expEnc: E('expEnc'), impEnc: E('impEnc'), impEncFile: E('impEncFile'),
   };
 
-  // --- State ---
-  let state = migrate(load()) || defaultState();
+  // ----- State -----
+  let state = migrate(load(KEY)) || defaultState();
+  let settings = load(KEY_SETTINGS) || { auto:false, day:1, time:'10:00', lastAutoBackup:null };
 
   function defaultState(){
-    const t = new Date();
-    const iso = t.toISOString().slice(0,10);
-    return {
-      _schema: SCHEMA_VERSION,
-      startDate: iso,           // toujours ISO
-      selectedDay: 1,
-      days: Array.from({length:totalDays}, _=>({done:false, ts:null})),
-      calYear: t.getFullYear(),
-      calMonth: t.getMonth()
-    };
+    const t = new Date(); const iso = t.toISOString().slice(0,10);
+    return { _schema:SCHEMA_VERSION, startDate:iso, selectedDay:1,
+      days:Array.from({length:totalDays}, _=>({done:false, ts:null})),
+      calYear:t.getFullYear(), calMonth:t.getMonth() };
   }
-  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+  function load(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
   function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+  function saveSettings(){ localStorage.setItem(KEY_SETTINGS, JSON.stringify(settings)); }
 
-  // Migration/normalisation : accepte anciens schémas et dates FR
   function migrate(data){
-    if(!data) return null;
-    if(typeof data !== 'object') return null;
-    const iso = normalizeDate(data.startDate);
-    if(!iso) return null; // on repartira sur défaut
+    if(!data||typeof data!=='object') return null;
+    const iso = normalizeDate(data.startDate); if(!iso) return null;
     data.startDate = iso;
-    if(!Array.isArray(data.days) || data.days.length!==totalDays){
+    if(!Array.isArray(data.days) || data.days.length!==totalDays)
       data.days = Array.from({length:totalDays}, _=>({done:false, ts:null}));
-    }
     if(typeof data.selectedDay!=='number') data.selectedDay=1;
-    if(typeof data.calYear!=='number' || typeof data.calMonth!=='number'){
-      const t=new Date(); data.calYear=t.getFullYear(); data.calMonth=t.getMonth();
-    }
-    data._schema = SCHEMA_VERSION;
-    return data;
+    if(typeof data.calYear!=='number'||typeof data.calMonth!=='number'){ const t=new Date(); data.calYear=t.getFullYear(); data.calMonth=t.getMonth(); }
+    data._schema = SCHEMA_VERSION; return data;
   }
 
-  // --- UI legend ---
+  // ----- UI legend -----
   plan.forEach(p=>{
-    const item = document.createElement('div');
-    item.className = 'tag';
-    item.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${p.color};margin-right:6px"></span>${p.name} — ${p.dose} gél./j · ${p.days} j`;
-    els.legend.appendChild(item);
+    const d = document.createElement('div'); d.className='tag';
+    d.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${p.color};margin-right:6px"></span>${p.name} — ${p.dose} gél./j · ${p.days} j`;
+    els.legend.appendChild(d);
   });
 
-  // --- Inputs ---
+  // ----- Inputs -----
   els.start.value = state.startDate;
   els.start.addEventListener('change', ()=>{
-    const iso = normalizeDate(els.start.value) || normalizeDate(els.start.value.split('-').reverse().join('/')); // fallback
-    if(!iso){ alert("Date invalide. Utilise le sélecteur."); els.start.value = state.startDate; return; }
+    const iso = normalizeDate(els.start.value) || normalizeDate(els.start.value.split('-').reverse().join('/'));
+    if(!iso){ alert("Date invalide."); els.start.value = state.startDate; return; }
     state.startDate = iso; save(); renderAll();
   });
   els.pickDay.addEventListener('change', ()=>{ state.selectedDay = parseInt(els.pickDay.value,10); save(); renderAll(); });
 
-  // --- Buttons ---
+  // ----- Buttons -----
   els.validateSelected.addEventListener('click',()=> markDone(state.selectedDay));
   els.validateToday.addEventListener('click',()=>{
     const idx = dayIndexFromDate(new Date());
     if(idx>=1 && idx<=totalDays){ state.selectedDay = idx; els.pickDay.value = idx; markDone(idx); }
-    else alert("Le jour courant n'est pas dans la fenêtre de cure (vérifie la date de début).");
+    else alert("Le jour courant n'est pas dans la fenêtre de cure.");
   });
   els.reset.addEventListener('click',()=>{
     if(confirm('Réinitialiser toute la cure ?')){ state = defaultState(); els.start.value = state.startDate; save(); renderAll(); }
   });
 
-  // --- Export / Import ---
+  // Export / Import
   els.exportBtn.addEventListener('click', exportData);
   els.importBtn.addEventListener('click', ()=> els.importFile.click());
   els.importFile.addEventListener('change', handleImportFile);
 
-  function exportData(){
-    // force ISO avant export
+  // ----- Auto backup -----
+  els.autoOn.checked = !!settings.auto;
+  els.autoDay.value = String(settings.day ?? 1);
+  els.autoTime.value = settings.time || '10:00';
+  updateAutoInfo();
+
+  els.autoOn.addEventListener('change', ()=>{ settings.auto = els.autoOn.checked; saveSettings(); updateAutoInfo(); });
+  els.autoDay.addEventListener('change', ()=>{ settings.day = parseInt(els.autoDay.value,10); saveSettings(); updateAutoInfo(); });
+  els.autoTime.addEventListener('change', ()=>{ settings.time = els.autoTime.value; saveSettings(); updateAutoInfo(); });
+
+  // Check every minute when the page is open
+  setInterval(checkAutoBackup, 60*1000);
+  // also check once at load
+  setTimeout(checkAutoBackup, 1500);
+
+  function updateAutoInfo(){
+    if(!settings.auto){ els.autoInfo.textContent = 'Sauvegarde hebdo désactivée.'; return; }
+    els.autoInfo.textContent = `Sauvegarde auto : ${labelDay(settings.day)} à ${settings.time}` + (settings.lastAutoBackup?` — dernière : ${new Date(settings.lastAutoBackup).toLocaleString('fr-FR')}`:'');
+  }
+  function labelDay(n){ return ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][n]; }
+  function checkAutoBackup(){
+    if(!settings.auto) return;
+    const now = new Date();
+    // prochain créneau cette semaine
+    const [hh,mm] = (settings.time||'10:00').split(':').map(x=>+x);
+    const target = new Date(now);
+    const dow = now.getDay(); // 0..6
+    let delta = (settings.day - dow); if(delta<0) delta += 7;
+    target.setDate(now.getDate()+delta); target.setHours(hh,mm,0,0);
+    // si on est déjà passé aujourd'hui et on est au bon jour → prendre aujourd’hui
+    if(delta===0 && now.getTime() > target.getTime()) target.setDate(target.getDate()+7);
+    // on veut déclencher si "le créneau de la semaine courante" vient d’être atteint et pas encore fait
+    const weekKey = weekStamp(target);
+    const already = settings.lastAutoBackup && weekStamp(new Date(settings.lastAutoBackup))===weekKey;
+    if(already) return;
+    // Si on est après l'heure et le jour (ou pile dessus), on déclenche
+    const thisWeekSlot = new Date(target); thisWeekSlot.setDate(target.getDate()-7); // slot précédent
+    const slot = new Date(target); slot.setDate(target.getDate()-7); // (placeholder non utilisé)
+    const shouldRun =
+      (now.getDay()===settings.day && now.getHours()===hh && now.getMinutes()>=mm) ||
+      (now.getDay()>settings.day); // si tu ouvres plus tard dans la semaine, on exporte quand même
+    if(shouldRun){
+      exportData(true); // true = mark as auto
+      settings.lastAutoBackup = Date.now();
+      saveSettings(); updateAutoInfo();
+    }
+  }
+  function weekStamp(date){ // YYYY-Www
+    const d=new Date(date); d.setHours(0,0,0,0);
+    const t = new Date(d.getTime());
+    const dayNum = (t.getDay()||7); t.setDate(t.getDate()+4-dayNum);
+    const yearStart = new Date(t.getFullYear(),0,1);
+    const week = Math.ceil((((t - yearStart) / 86400000) + 1)/7);
+    return `${t.getFullYear()}-W${pad(week)}`;
+  }
+
+  // ----- Crypto helpers (AES-GCM + PBKDF2) -----
+  async function deriveKey(pass){
+    const enc = new TextEncoder();
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const baseKey = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey(
+      { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
+      baseKey,
+      { name:'AES-GCM', length:256 },
+      false,
+      ['encrypt','decrypt']
+    );
+    return {key, salt};
+  }
+  async function deriveKeyFromSalt(pass, salt){
+    const enc = new TextEncoder();
+    const baseKey = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey(
+      { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
+      baseKey,
+      { name:'AES-GCM', length:256 },
+      false,
+      ['encrypt','decrypt']
+    );
+    return key;
+  }
+  async function encryptJson(pass, obj){
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const {key, salt} = await deriveKey(pass);
+    const data = new TextEncoder().encode(JSON.stringify(obj));
+    const ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, data));
+    // format: magic|salt(16)|iv(12)|cipher
+    const magic = new TextEncoder().encode('CAPACTV1');
+    const out = new Uint8Array(magic.length+16+12+ct.length);
+    out.set(magic,0); out.set(salt,magic.length); out.set(iv,magic.length+16); out.set(ct,magic.length+16+12);
+    return out;
+  }
+  async function decryptJson(pass, buf){
+    const u8 = new Uint8Array(buf);
+    const magic = new TextDecoder().decode(u8.slice(0,8));
+    if(magic!=='CAPACTV1') throw new Error('Format inconnu');
+    const salt = u8.slice(8,24);
+    const iv = u8.slice(24,36);
+    const ct = u8.slice(36);
+    const key = await deriveKeyFromSalt(pass, salt);
+    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, ct);
+    return JSON.parse(new TextDecoder().decode(new Uint8Array(pt)));
+  }
+
+  // ----- Export / Import JSON -----
+  function exportData(isAuto=false){
+    // force ISO
     state.startDate = normalizeDate(state.startDate) || state.startDate;
-    const clean = JSON.stringify(state, null, 2);
-    const blob = new Blob([clean], {type:'application/json'});
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
     const a = document.createElement('a');
-    const pad = n=>String(n).padStart(2,'0');
     const now = new Date();
     a.href = URL.createObjectURL(blob);
-    a.download = `capactifs_backup_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}h${pad(now.getMinutes())}.json`;
+    a.download = `${isAuto?'AUTO_':''}capactifs_backup_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}h${pad(now.getMinutes())}.json`;
     document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
   }
-
   function handleImportFile(ev){
-    const file = ev.target.files[0];
-    ev.target.value = '';
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
+    const file = ev.target.files[0]; ev.target.value=''; if(!file) return;
+    const rd = new FileReader();
+    rd.onload = ()=>{
       try{
-        const data = JSON.parse(reader.result);
-        const ok = validateSchema(data);
-        if(!ok.ok){ alert('Fichier invalide : '+ok.reason); return; }
+        const data = JSON.parse(rd.result);
+        if(!validateSchema(data).ok) return alert('Fichier invalide.');
         const iso = normalizeDate(data.startDate);
-        const done = data.days.filter(x=>x.done).length;
-        const go = confirm(`Importer ?\n\nDébut: ${iso}\nJours validés: ${done}/${totalDays}\nSélection: jour ${data.selectedDay}`);
+        const go = confirm(`Importer ?\nDébut: ${iso}\nValidés: ${data.days.filter(x=>x.done).length}/${totalDays}`);
         if(!go) return;
         data.startDate = iso;
-        state = migrate(data) || defaultState();
-        save(); renderAll();
-      }catch(e){ alert('Impossible de lire ce fichier JSON.'); }
+        state = migrate(data) || defaultState(); save(); renderAll();
+      }catch(e){ alert('JSON illisible.'); }
     };
-    reader.readAsText(file, 'utf-8');
+    rd.readAsText(file,'utf-8');
   }
-
   function validateSchema(d){
-    if(typeof d!=='object' || !d) return {ok:false, reason:'format JSON absent/incorrect'};
-    // accepte ISO ou FR
-    if(!normalizeDate(d.startDate)) return {ok:false, reason:'date de début invalide'};
-    if(typeof d.selectedDay!=='number' || d.selectedDay<1 || d.selectedDay>totalDays) return {ok:false, reason:'selectedDay invalide'};
-    if(!Array.isArray(d.days) || d.days.length!==totalDays) return {ok:false, reason:'taille des jours incorrecte (doit être 120)'};
-    for(const it of d.days){
-      if(typeof it.done!=='boolean') return {ok:false, reason:'champ "done" manquant/incorrect'};
-      if(!(it.ts===null || typeof it.ts==='number')) return {ok:false, reason:'champ "ts" invalide'};
-    }
-    if(typeof d.calYear!=='number' || typeof d.calMonth!=='number') return {ok:false, reason:'infos agenda manquantes'};
+    if(typeof d!=='object'||!d) return {ok:false};
+    if(!normalizeDate(d.startDate)) return {ok:false};
+    if(typeof d.selectedDay!=='number') return {ok:false};
+    if(!Array.isArray(d.days)||d.days.length!==totalDays) return {ok:false};
     return {ok:true};
   }
 
-  // --- Helpers ---
-  function phaseIdxForDay(idx){ let n=idx, i=0; for(const p of plan){ if(n<=p.days) return i; n-=p.days; i++; } return 0; }
+  // ----- Export / Import CHIFFRÉ -----
+  els.expEnc.addEventListener('click', async ()=>{
+    const pass = els.pass.value.trim();
+    if(pass.length<6){ alert('Choisis une phrase-clé d’au moins 6 caractères.'); return; }
+    state.startDate = normalizeDate(state.startDate) || state.startDate;
+    const bytes = await encryptJson(pass, state);
+    const a = document.createElement('a');
+    const now = new Date();
+    const blob = new Blob([bytes], {type:'application/octet-stream'});
+    a.href = URL.createObjectURL(blob);
+    a.download = `capactifs_backup_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}h${pad(now.getMinutes())}.enc`;
+    document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+  });
+
+  els.impEnc.addEventListener('click', ()=> els.impEncFile.click());
+  els.impEncFile.addEventListener('change', async (ev)=>{
+    const file = ev.target.files[0]; ev.target.value=''; if(!file) return;
+    const pass = els.pass.value.trim(); if(pass.length<6){ alert('Entre la phrase-clé utilisée à l’export.'); return; }
+    const rd = new FileReader();
+    rd.onload = async ()=>{
+      try{
+        const data = await decryptJson(pass, rd.result);
+        if(!validateSchema(data).ok) return alert('Fichier déchiffré invalide.');
+        data.startDate = normalizeDate(data.startDate);
+        state = migrate(data) || defaultState(); save(); renderAll();
+      }catch(e){ alert('Clé incorrecte ou fichier corrompu.'); }
+    };
+    rd.readAsArrayBuffer(file);
+  });
+
+  // ----- Helpers -----
+  function phaseIdxForDay(idx){ let n=idx,i=0; for(const p of plan){ if(n<=p.days) return i; n-=p.days; i++; } return 0; }
   function dateForIndex(idx){
-    const start = new Date((state.startDate)+'T00:00:00');
+    const start = new Date(state.startDate+'T00:00:00');
     const d = new Date(start.getTime() + (idx-1)*86400000);
     return d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'});
   }
   function dayIndexFromDate(d){
-    const s = new Date((state.startDate)+'T00:00:00');
+    const s = new Date(state.startDate+'T00:00:00');
     const diff = Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()) - Date.UTC(s.getFullYear(),s.getMonth(),s.getDate()))/86400000);
     return diff+1;
   }
@@ -344,29 +470,24 @@
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
     return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
   }
+
+  // ----- Renders -----
   function populateSelect(){
-    const sel = els.pickDay;
-    sel.innerHTML = '';
+    els.pickDay.innerHTML = '';
     for(let i=1;i<=totalDays;i++){
       const o=document.createElement('option');
-      o.value=i;o.textContent=`Jour ${i}`;
-      sel.appendChild(o);
+      o.value=i; o.textContent=`Jour ${i}`;
+      els.pickDay.appendChild(o);
     }
-    sel.value = state.selectedDay;
+    els.pickDay.value = state.selectedDay;
   }
 
   function markDone(idx){
-    const i = idx-1;
-    if(i<0 || i>=state.days.length) return;
+    const i = idx-1; if(i<0||i>=state.days.length) return;
     if(!state.days[i].done){ state.days[i].done = true; state.days[i].ts = Date.now(); }
     save(); renderAll();
   }
-  function openPhaseFor(idx){
-    const pIdx = phaseIdxForDay(idx);
-    document.querySelectorAll('details.phase').forEach((d,i)=>{ d.open = (i===pIdx); });
-  }
 
-  // --- Renders ---
   function renderPhases(){
     els.phases.innerHTML = '';
     let cursor = 1;
@@ -378,8 +499,8 @@
       sum.innerHTML = `<div class="dot" style="background:${p.color}"></div>
         <h3 style="margin:0;font-size:15px">${p.name} — <span style="color:#cfe1ff">${p.dose} gélules/j</span> • <span style="color:#9fb2c7">${p.days} jours</span></h3>`;
       details.appendChild(sum);
-      const body = document.createElement('div'); body.className='ph-body';
 
+      const body = document.createElement('div'); body.className='ph-body';
       for(let k=1;k<=p.days;k++){
         const idx = cursor, d = state.days[idx-1];
         const todayIdx = dayIndexFromDate(new Date());
@@ -397,7 +518,6 @@
       els.phases.appendChild(details);
       details.addEventListener('toggle', ()=>{ if(details.open){ document.querySelectorAll('details.phase').forEach(d=>{ if(d!==details) d.open=false; }); }});
     });
-    openPhaseFor(state.selectedDay);
   }
 
   function renderProgress(){
@@ -411,41 +531,29 @@
     const y = state.calYear, m = state.calMonth;
     els.agTitle.textContent = `${new Date(y,m,1).toLocaleDateString('fr-FR',{month:'long', year:'numeric'})}`;
 
-    const head = document.createElement('div');
-    head.className = 'week';
+    const head = document.createElement('div'); head.className = 'week';
     const h0 = document.createElement('div'); h0.className='wcell'; h0.textContent='#'; head.appendChild(h0);
     ['L','M','M','J','V','S','D'].forEach(d=>{ const c=document.createElement('div'); c.className='wcell'; c.textContent=d; head.appendChild(c); });
 
     const first = new Date(y,m,1);
-    const start = new Date(first);
-    const day = (first.getDay()||7);
-    start.setDate(first.getDate() - (day-1));
+    const start = new Date(first); const day = (first.getDay()||7); start.setDate(first.getDate() - (day-1));
 
-    const wrap = document.createElement('div');
-    wrap.appendChild(head);
-
+    const wrap = document.createElement('div'); wrap.appendChild(head);
     let d = new Date(start);
     for(let w=0; w<6; w++){
       const row = document.createElement('div'); row.className='week';
       const wk = document.createElement('div'); wk.className='wcell weeknum'; wk.textContent = isoWeekNumber(d);
       row.appendChild(wk);
-
       for(let i=0;i<7;i++){
         const cell = document.createElement('div'); cell.className='cell';
         const inMonth = (d.getMonth()===m); if(!inMonth) cell.classList.add('muted');
         const idx = inCureRange(d);
-        if(idx){
-          if(state.days[idx-1].done) cell.classList.add('ok');
-          if(state.selectedDay===idx) cell.classList.add('sel');
-        } else cell.classList.add('disabled');
+        if(idx){ if(state.days[idx-1].done) cell.classList.add('ok'); if(state.selectedDay===idx) cell.classList.add('sel'); }
+        else cell.classList.add('disabled');
 
         cell.textContent = d.getDate();
         const clickDate = new Date(d.getTime());
-        cell.addEventListener('click', ()=>{
-          const testIdx = inCureRange(clickDate);
-          if(testIdx){ state.selectedDay = testIdx; save(); renderAll(); }
-        });
-
+        cell.addEventListener('click', ()=>{ const testIdx = inCureRange(clickDate); if(testIdx){ state.selectedDay = testIdx; save(); renderAll(); }});
         row.appendChild(cell);
         d.setDate(d.getDate()+1);
       }
@@ -459,6 +567,7 @@
 
   // Init
   renderAll();
+
 })();
 </script>
 </body>
