@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coach — Journal & Générateur</title>
+      <link rel="icon" href="/addon/coach/img/muscle.png" sizes="96x96">
+  <link rel="stylesheet" href="journal.css" />
+  <!-- (engine.css est inclus dans journal.css via quelques classes communes, tu peux garder un seul fichier) -->
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="h1">Coach — Journal & Générateur</div>
+      <div class="sub">
+        Onglets : <b>Journal</b> (saisie & suivi) et <b>Générateur</b> (Training Load Engine).
+        Tout est stocké en localStorage. 
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- Onglets -->
+    <nav class="tabs">
+      <button class="tabBtn is-active" data-tab="journal">Journal</button>
+      <button class="tabBtn" data-tab="engine">Générateur</button>
+      <button class="tabBtn" data-tab="week">Semaine (débutant)</button>
+      <button class="tabBtn" data-tab="week-adv">Semaine (avancé)</button>
+      
+    </nav>
+
+    <!-- === Onglet 1 : JOURNAL === -->
+    <section class="tabPanel is-active" id="panel-journal">
+      <main>
+        <!-- LEFT: CATALOGUE -->
+        <section class="panel catalogue">
+          <div class="sectionHead">
+            <h2>Exercices</h2>
+            <span class="badge"><span class="dot c1"></span>Catégories repliables</span>
+          </div>
+          <div class="search"><input id="q" class="input" placeholder="Rechercher (nom, muscles, matériel)…"></div>
+          <div class="catList" id="catList"></div>
+        </section>
+
+        <!-- RIGHT: JOURNAL -->
+        <section class="panel">
+          <div class="sectionHead">
+            <h2>Journal</h2>
+            <div class="toolbar">
+              <button id="exp" class="btn ghost">Exporter JSON</button>
+              <label class="btn ghost" for="impFile">Importer JSON</label>
+              <input id="impFile" type="file" accept="application/json" style="display:none">
+              <button id="clear" class="btn warn">Réinitialiser</button>
+            </div>
+          </div>
+
+          <!-- Réglages persistants -->
+          <div class="card">
+            <div class="presetBar">
+              <div class="presetGroup">
+                <span class="lbl">Presets :</span>
+                <button class="btn sm" data-preset="barre">Barre</button>
+                <button class="btn sm" data-preset="halteres">Haltères</button>
+                <button class="btn sm" data-preset="pdc">PDC / Chrono</button>
+                <button class="btn sm ghost" id="savePreset">💾 Sauver sur preset actif</button>
+              </div>
+              <label class="chk"><input type="checkbox" id="keepSettings" checked> Garder mes réglages au clic d’un exercice</label>
+            </div>
+
+            <div class="formGrid wide">
+              <div>
+                <div class="lbl">Mode</div>
+                <select id="fxMode" class="select">
+                  <option value="reps">Répétitions</option>
+                  <option value="time">Chrono (secondes)</option>
+                </select>
+              </div>
+              <div>
+                <div class="lbl">Poids (kg)</div>
+                <input id="fxWeight" class="inputBox" type="number" min="0" value="0">
+              </div>
+              <div>
+                <div class="lbl">Répétitions</div>
+                <input id="fxReps" class="inputBox" type="number" min="0" value="10">
+              </div>
+              <div>
+                <div class="lbl">Temps (sec)</div>
+                <input id="fxTime" class="inputBox" type="number" min="0" value="0">
+              </div>
+              <div>
+                <div class="lbl">Séries</div>
+                <input id="fxSets" class="inputBox" type="number" min="1" value="3">
+              </div>
+              <div>
+                <div class="lbl">RPE (1–10)</div>
+                <input id="fxRpe" class="inputBox" type="number" min="1" max="10" value="7">
+              </div>
+              <div>
+                <div class="lbl">Ressenti</div>
+                <select id="fxFeel" class="select">
+                  <option>Facile</option>
+                  <option selected>Moyen</option>
+                  <option>Difficile</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="help">
+              Poids (kg) • Répétitions/Séries <i>ou</i> Temps(s)/Séries • RPE • Ressenti.
+              « Garder mes réglages » évite d’écraser ces valeurs au clic.
+            </div>
+          </div>
+
+          <!-- Sélection + ajout -->
+          <div class="card">
+            <div class="formGrid oneRow">
+              <div>
+                <div class="lbl">Exercice sélectionné</div>
+                <input id="fxName" class="inputBox" placeholder="Clique un exercice dans la liste de gauche" readonly>
+              </div>
+              <div style="align-self:end">
+                <button id="add" class="btn ok">Valider → Ajouter au journal</button>
+              </div>
+            </div>
+
+            <table class="table" id="logTable">
+              <thead>
+                <tr><th>Date</th><th>Catégorie</th><th>Exercice</th><th>Mode</th><th>Poids</th><th>Rép.</th><th>Temps</th><th>Séries</th><th>RPE</th><th>Ressenti</th><th>Volume</th><th></th></tr>
+              </thead>
+              <tbody></tbody>
+              <tfoot>
+                <tr><th colspan="10">Volume total</th><th id="volTot">0</th><th></th></tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+      </main>
+    </section>
+
+    <!-- === Onglet 2 : ENGINE === -->
+    <section class="tabPanel" id="panel-engine">
+      <section class="panel">
+        <div class="sectionHead"><h2>Générateur de séance — Training Load</h2></div>
+        <div class="card">
+          <div class="tle-grid">
+            <div>
+              <div class="lbl">Score cible (Charge)</div>
+              <input id="tleScore" class="inputBox" type="number" min="500" step="100" value="3800">
+              <div class="muted">Charge = Volume × (RPE/10)</div>
+            </div>
+            <div>
+              <div class="lbl">Type de séance</div>
+              <select id="tleCat" class="select">
+                <option value="Full">Full body</option>
+                <option value="Haut du corps">Haut du corps</option>
+                <option value="Bas du corps">Bas du corps</option>
+                <option value="Core/Abdos">Core/Abdos</option>
+                <option value="Cardio doux">Cardio doux</option>
+              </select>
+            </div>
+            <div>
+              <div class="lbl">Tolérance</div>
+              <select id="tleTol" class="select">
+                <option value="0.05">±5%</option>
+                <option value="0.1">±10%</option>
+              </select>
+            </div>
+            <div>
+              <div class="lbl">RPE global estimé</div>
+              <input id="tleRpe" class="inputBox" type="number" min="4" max="10" step="0.5" value="7">
+            </div>
+            <div style="align-self:end">
+              <button id="tleGen" class="btn ok">Générer la séance</button>
+            </div>
+          </div>
+
+          <div class="tle-meter">
+            <div id="tleBar" class="tle-bar"></div>
+            <div class="tle-zones">
+              <span>💧 Légère</span><span>⚡ Modérée</span><span>🔥 Élevée</span><span>🧨 Très haute</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sectionHead" style="border:none; padding:0 0 8px">
+            <h3 style="margin:0">Plan généré</h3>
+            <div><button id="tleSave" class="btn ghost" disabled>Enregistrer dans le journal</button></div>
+          </div>
+
+          <table class="table" id="tleTable">
+            <thead>
+              <tr>
+                <th>Exercice</th><th>Catégorie</th><th>Mode</th><th>Poids</th><th>Rép.</th><th>Temps</th><th>Séries</th><th>RPE</th><th>Volume</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+              <tr><th colspan="8">Volume total</th><th id="tleVol">0</th></tr>
+              <tr><th colspan="8">Charge réelle</th><th id="tleLoad">0</th></tr>
+              <tr><th colspan="8">Calories estimées</th><th id="tleKcal">0</th></tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+    </section>
+
+<!-- === Onglet 3 : SEMAINE 1 === -->
+<section class="tabPanel" id="panel-week">
+  <iframe src="coach_week.html" 
+          style="width:100%; height:90vh; border:none; border-radius:10px; background:#0f1115;">
+  </iframe>
+</section>
+
+    <!-- === Onglet 4 : SEMAINE 2 === -->
+<section class="tabPanel" id="panel-week-adv">
+  <iframe src="coach-onglet-semaine-advanced.html"
+          style="width:100%; height:90vh; border:none; border-radius:10px; background:#0f1115;">
+  </iframe>
+</section>
+
+    
+  </div>
+
+  <script src="journal.js" defer></script>
+  <script src="engine.js" defer></script>
+
+  <!-- Switch onglets (ultra léger) -->
+  <script>
+    (function(){
+      const KEY='active_tab_v1';
+      const $=(q,r=document)=>r.querySelector(q);
+      const $$=(q,r=document)=>[...r.querySelectorAll(q)];
+      function activate(name){
+        $$('.tabBtn').forEach(b=>b.classList.toggle('is-active', b.dataset.tab===name));
+        $$('.tabPanel').forEach(p=>p.classList.toggle('is-active', p.id==='panel-'+name));
+        localStorage.setItem(KEY,name);
+      }
+      $$('.tabBtn').forEach(b=>b.addEventListener('click',()=>activate(b.dataset.tab)));
+      activate(localStorage.getItem(KEY)||'journal');
+    })();
+  </script>
+</body>
+</html>
+
+
+
+
+

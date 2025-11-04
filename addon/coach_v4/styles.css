@@ -1,0 +1,267 @@
+/* ====== Thème ====== */
+:root{
+  --bg:#0f1115;
+  --card:#141822;
+  --ink:#e8ecf3;
+  --muted:#9fb0c3;
+  --chip:#1b2330;
+  --border:#273042;
+
+  --green:#5ee1a8;
+  --blue:#74b3ff;
+  --red:#ff7a7a;
+  --gray:#96a2b5;
+
+  --hero-grad: linear-gradient(135deg, #1a2336 0%, #182337 40%, #1a1f2d 100%);
+  --hero-accent: rgba(116,179,255,.25);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* ====== Topbar / Hero ====== */
+.topbar{
+  position:sticky; top:0; z-index:20;
+  backdrop-filter:saturate(1.1) blur(8px);
+  background:var(--hero-grad);
+  border-bottom:1px solid rgba(116,179,255,.15);
+  box-shadow:0 6px 24px rgba(0,0,0,.35), inset 0 -1px 0 rgba(255,255,255,.04);
+}
+.topbar-inner{
+  max-width:1200px; margin:0 auto; padding:16px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+}
+.brand h1{
+  margin:0; font-size:20px; letter-spacing:.2px;
+  text-shadow:0 1px 0 rgba(0,0,0,.4);
+}
+.tagline{
+  margin:2px 0 0 0; color:var(--muted); font-size:12px
+}
+.actions{display:flex; gap:8px; flex-wrap:wrap}
+
+/* ====== Boutons ====== */
+.btn,.btn-sm{
+  background:#1c2533;
+  color:var(--ink);
+  border:1px solid var(--border);
+  border-radius:12px;
+  cursor:pointer;
+  transition:transform .04s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+}
+.btn{padding:8px 12px; font-size:14px}
+.btn-sm{padding:4px 8px; font-size:12px; border-radius:10px}
+.btn:hover{box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{outline:2px solid var(--blue)}
+.btn.danger{border-color:#ff9a9a33; background:#2a1d22}
+.btn.danger:hover{border-color:#ff9a9a66}
+
+/* ====== Layout principal ====== */
+.container{
+  max-width:1600px;
+  margin:24px auto;
+  padding:0 16px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:16px;
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+h2{margin:0 0 12px 0; font-size:16px}
+
+/* ====== Table ====== */
+.table{width:100%; border-collapse:collapse; font-size:14px}
+.table th,.table td{padding:8px; border-bottom:1px dashed var(--border); text-align:left}
+
+/* ====== Calendrier ====== */
+.cal-toolbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px}
+.cal-title{font-weight:600}
+.calendar{display:grid; grid-template-columns:repeat(8,1fr); gap:6px}
+.weeknum{
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; color:var(--muted)
+}
+.cell{
+  position:relative;
+  aspect-ratio:1/1;
+  border:1px solid rgba(180,200,255,.22);
+  border-radius:12px;
+  background:#162034;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; cursor:pointer;
+  transition:transform .05s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+}
+.cell:hover{
+  border-color:rgba(180,200,255,.38);
+  box-shadow:0 8px 18px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+  background:#1a2945;
+}
+.cell.today{
+  outline:2px solid var(--blue);
+  box-shadow:0 0 0 3px var(--hero-accent) inset, 0 4px 14px rgba(116,179,255,.25);
+  background:#152237;
+}
+.badge-mini{position:absolute; top:6px; right:6px; width:9px; height:9px; border-radius:50%}
+.badge-mini.full{background:var(--red)}
+.badge-mini.cardio{background:var(--blue)}
+.badge-mini.off{background:var(--gray)}
+.badge-mini.ok{background:#62d26f}
+
+/* Légende */
+.legend{margin-top:8px; display:flex; gap:12px; align-items:center; color:var(--muted); font-size:12px; flex-wrap:wrap}
+.legend .dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px}
+.legend .full{background:var(--red)} .legend .cardio{background:var(--blue)} .legend .off{background:var(--gray)} .legend .ok{background:#62d26f}
+
+/* ====== Réglage / panneaux ====== */
+.badge{
+  background:var(--chip);
+  border:1px solid var(--border);
+  color:var(--muted);
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:12px
+}
+.inline{display:inline-flex; gap:6px; align-items:center; margin-left:8px}
+.row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:6px 0}
+.hint{color:var(--muted); font-size:12px}
+
+.tabs{display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap}
+.tab{
+  background:#1c2533;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:4px 8px;
+  cursor:pointer;
+  transition:background .2s ease, border-color .2s ease, transform .04s ease;
+}
+.tab:hover{background:#202c3d}
+.tab:active{transform:translateY(1px)}
+.tab.active{outline:2px solid var(--blue)}
+.panel.hidden{display:none}
+.simout{margin-top:6px; color:var(--muted); font-size:13px}
+
+/* ====== Plan de semaine ====== */
+#plan{grid-column:1 / -1}
+.day{
+  border-left:8px solid transparent;
+  border:1px solid var(--border);
+  border-radius:14px;
+  margin:12px 0;
+  background:#0f141e;
+  overflow:hidden;
+}
+.day[data-type="full"]{border-left-color:var(--green)}
+.day[data-type="cardio"]{border-left-color:var(--blue)}
+.day[data-type="off"]{border-left-color:var(--gray)}
+.day>header{display:flex; gap:10px; align-items:center; padding:10px 12px; background:rgba(255,255,255,.02)}
+.day h3{margin:0; font-size:15px}
+.chev{
+  background:#1c2533;
+  border:1px solid var(--border);
+  border-radius:8px;
+  color:var(--ink);
+  padding:2px 6px;
+  cursor:pointer
+}
+.body{padding:0 12px 12px 12px}
+.hidden{display:none}
+
+/* Exo blocs */
+.exo{
+  border:1px dashed var(--border);
+  border-radius:12px;
+  padding:8px;
+  margin:8px 0;
+  background:#121828;
+  transition:box-shadow .2s ease, border-color .2s ease;
+}
+.exo:hover{box-shadow:0 6px 16px rgba(0,0,0,.28)}
+.line1{display:flex; justify-content:space-between; align-items:center}
+.params{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px}
+.num{
+  background:var(--chip); color:var(--ink);
+  border:1px solid var(--border);
+  border-radius:10px; padding:6px 8px;
+}
+.num.xs{max-width:4.4rem}
+.num.sm{max-width:7.2rem}
+.num.lg{max-width:16rem}
+.post-training{margin-top:8px; font-size:13px; color:var(--muted)}
+
+/* Chips layout */
+.chips{
+  margin-top:6px;
+  padding:6px 8px;
+  background:#162133;
+  border:1px solid var(--border);
+  border-radius:999px;
+  color:var(--muted);
+  font-size:12px;
+  display:inline-block;
+}
+
+/* ====== Lexique ====== */
+#lexique .lex{
+  margin:0; padding-left:18px;
+  font-size:13px; color:var(--muted); line-height:1.55
+}
+#lexique .lex li{margin:4px 0}
+
+/* ====== Formulaires ====== */
+input, select, button{font:inherit}
+
+/* --- Anti-halo violet pendant le scroll --- */
+.card { isolation: isolate; }                 /* coupe les mélanges entre couches */
+.chips { contain: paint; will-change: transform; transform: translateZ(0); } /* force une couche dédiée */
+
+/* Option (si halo persiste un peu) : neutraliser toute ombre/outline des chips pendant le scroll */
+.scrolling .chips { box-shadow: none !important; }
+
+/* Option douce : fond un peu moins translucide sur les chips */
+.chips { background: #141e30; } /* était #162133, légèrement plus opaque */
+
+/* Stats sous calendrier */
+.stats-note{
+  margin-top:8px;
+  display:flex; gap:16px; flex-wrap:wrap;
+  color:var(--muted); font-size:13px;
+}
+.stats-note strong{color:var(--ink)}
+
+/* Extras */
+.extra-list{margin-top:8px; display:flex; flex-direction:column; gap:6px}
+.extra-item{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px; border:1px dashed var(--border); border-radius:10px;
+  background:#121828; font-size:13px; color:var(--muted);
+}
+.extra-item .meta{display:flex; gap:10px; align-items:center}
+.extra-item .tag{padding:2px 8px; border-radius:999px; border:1px solid var(--border); background:var(--chip); color:var(--ink); font-size:12px}
+.extra-item button{font-size:12px}
+
+
+
+/* ====== Responsif ====== */
+@media (max-width:980px){
+  .container{grid-template-columns:1fr}
+  .topbar-inner{flex-direction:column; align-items:flex-start}
+  .actions{width:100%}
+}
+
+
+
+

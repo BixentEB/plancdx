@@ -1,0 +1,94 @@
+<div class="card">
+  <h2>Réglages & préférences</h2>
+
+  <div class="row" style="gap:12px; flex-wrap:wrap">
+    <div class="card" style="flex:1; min-width:260px">
+      <h3>Affichage</h3>
+      <div class="row" style="gap:8px; margin-top:6px">
+        <label>Layout
+          <select id="set-layout" class="btn small" style="background:#202022; color:#ccc">
+            <option value="dense">Détaillé</option>
+            <option value="chips">Résumé (chips)</option>
+          </select>
+        </label>
+        <button id="apply-layout" class="btn small">Appliquer</button>
+      </div>
+      <p class="hint">Le layout «Résumé» compresse les lignes d’exercices en pastilles.</p>
+    </div>
+
+    <div class="card" style="flex:1; min-width:260px">
+      <h3>Musculation</h3>
+      <div class="row" style="gap:8px; margin-top:6px">
+        <label>Repos par défaut
+          <select id="set-rest" class="btn small" style="background:#202022; color:#ccc">
+            <option value="60">60s</option>
+            <option value="75">75s</option>
+            <option value="90" selected>90s</option>
+            <option value="120">120s</option>
+          </select>
+        </label>
+        <label>+0,5 kg auto (si charge)
+          <input type="checkbox" id="set-add05">
+        </label>
+        <button id="apply-muscu" class="btn small">Sauver</button>
+      </div>
+      <p class="hint">L’augmentation automatique ajoute +0,5 sur toutes les valeurs numériques lors des adaptations.</p>
+    </div>
+
+    <div class="card" style="flex:1; min-width:260px">
+      <h3>Gestion</h3>
+      <div class="row" style="gap:8px; margin-top:6px">
+        <button id="copy-A-B" class="btn small">Copier A → B</button>
+        <button id="copy-B-A" class="btn small primary">Copier B → A</button>
+        <button id="reset-cal" class="btn small danger">Effacer validations calendrier</button>
+      </div>
+      <p class="hint">Tu peux aussi utiliser Exporter / Importer / Réinitialiser dans la barre du haut.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  if(!window.V5){ return; }
+  const K_CAL = 'coach_v5_calendar';
+  const s = V5.getState();
+
+  // Pré-chargement UI
+  const ui = s.ui || (s.ui={});
+  const selLayout = document.getElementById('set-layout');
+  const selRest   = document.getElementById('set-rest');
+  const chkAdd05  = document.getElementById('set-add05');
+
+  selLayout.value = ui.layout || (document.body.dataset.layout || 'dense');
+  selRest.value   = String(ui.restMuscu || 90);
+  chkAdd05.checked= !!ui.add05;
+
+  document.getElementById('apply-layout')?.addEventListener('click', ()=>{
+    document.body.dataset.layout = selLayout.value;
+    ui.layout = selLayout.value;
+    V5.saveState(s);
+    alert('Layout appliqué ✅');
+  });
+
+  document.getElementById('apply-muscu')?.addEventListener('click', ()=>{
+    ui.restMuscu = Number(selRest.value||90);
+    ui.add05 = !!chkAdd05.checked;
+    V5.saveState(s);
+    alert('Réglages muscu enregistrés ✅');
+  });
+
+  document.getElementById('copy-A-B')?.addEventListener('click', ()=> V5.copyAtoB());
+  document.getElementById('copy-B-A')?.addEventListener('click', ()=>{
+    V5.copyBtoA();
+    alert('Programme B → A appliqué ✅');
+  });
+
+  document.getElementById('reset-cal')?.addEventListener('click', ()=>{
+    if(confirm('Supprimer toutes les validations du calendrier ?')){
+      localStorage.removeItem(K_CAL);
+      alert('Validations effacées ✅');
+      // pas de reload obligatoire; l’agenda se rafraîchira au prochain rendu
+    }
+  });
+})();
+</script>

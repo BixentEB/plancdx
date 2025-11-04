@@ -1,0 +1,58 @@
+<div class="card">
+  <h2>Programme B — Maquette</h2>
+  <p class="hint">
+    Construis ton programme dans l’onglet <em>Encyclopédie</em> ou <em>Programmes (Templates)</em>, puis vérifie ici.  
+    Quand c’est bon, utilise <strong>Copier B → A</strong> pour l’appliquer.
+  </p>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 12px">
+    <button id="bCopyBtoA" class="btn small primary">Copier B → A (remplacer A)</button>
+    <button id="bCopyAtoB" class="btn small">Copier A → B</button>
+  </div>
+
+  <div id="planB-root" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px"></div>
+</div>
+
+<script>
+(function(){
+  if(!window.V5) return;
+  const root = document.getElementById('planB-root');
+
+  function chip(t){ const s=document.createElement('span'); s.className='chip'; s.textContent=t; return s; }
+  function cardForDay(idx, day){
+    const card = document.createElement('div'); card.className='card';
+    const h = document.createElement('h3'); h.textContent = V5.dayLabel(idx); card.appendChild(h);
+    const list=document.createElement('div'); list.style.display='flex'; list.style.flexDirection='column'; list.style.gap='6px';
+
+    const items=(day?.items||[]);
+    if(!items.length){ const p=document.createElement('p'); p.className='hint'; p.textContent='Aucun exercice'; list.appendChild(p); }
+    else{
+      items.forEach(it=>{
+        const row=document.createElement('div'); row.className='cardExo';
+        const title=document.createElement('div'); title.className='title';
+        title.innerHTML=`${it.name} <span class="meta">${(it.type||'').toUpperCase()}</span>`;
+        const meta=document.createElement('div'); meta.className='meta';
+        const v=it.vals||{};
+        if(it.type==='muscu'){ meta.appendChild(chip((v.sets??'?')+'×'+(v.reps??'?'))); if(v.load) meta.appendChild(chip(String(v.load))); if(v.tempo) meta.appendChild(chip('Tempo '+v.tempo)); if(v.rpe!=null) meta.appendChild(chip('RPE '+v.rpe)); }
+        if(it.type==='cardio'){ meta.appendChild(chip((v.total??'?')+' min')); meta.appendChild(chip('WU '+(v.wu??'?'))); if(v.bloc) meta.appendChild(chip(String(v.bloc))); meta.appendChild(chip('CD '+(v.cd??'?'))); }
+        if(it.type==='tibo'){ meta.appendChild(chip((v.total??'?')+' min')); meta.appendChild(chip('WU '+(v.wu??'5'))); meta.appendChild(chip(v.bloc?String(v.bloc):'3’/3’ × ?')); meta.appendChild(chip('CD '+(v.cd??'5'))); }
+        if(it.type==='core'){ meta.appendChild(chip((v.sets??'?')+'×'+(v.sec??'?')+'s')); if(v.rpe!=null) meta.appendChild(chip('RPE '+v.rpe)); }
+        row.appendChild(title); row.appendChild(meta); list.appendChild(row);
+      });
+    }
+    card.appendChild(list);
+    return card;
+  }
+
+  function render(){
+    root.innerHTML='';
+    const s=V5.getState(); const prog=s.programB||{};
+    for(let i=1;i<=7;i++) root.appendChild(cardForDay(i, prog[i]||{items:[]}));
+  }
+
+  document.getElementById('bCopyBtoA')?.addEventListener('click', ()=>{ V5.copyBtoA(); render(); });
+  document.getElementById('bCopyAtoB')?.addEventListener('click', ()=>{ V5.copyAtoB(); render(); });
+
+  render();
+})();
+</script>

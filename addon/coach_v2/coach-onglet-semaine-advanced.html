@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coach — Semaine (Hebdo + Agenda + Plan)</title>
+  <style>
+    :root{
+      --bg:#0f1115; --card:#141822; --ink:#e8ecf3; --muted:#9fb0c3; --chip:#1b2330; --border:#273042;
+      --green:#5ee1a8; --blue:#74b3ff; --red:#ff7a7a; --amber:#ffcf66; --gray:#96a2b5; --purple:#b08cff;
+    }
+    body{background:var(--bg); color:var(--ink); font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+    #page{max-width:1200px; margin:24px auto; padding:16px}
+    .row{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px;}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px}
+    h1{font-size:20px; margin:0 0 14px}
+    h2{font-size:16px; margin:0 0 10px}
+    .muted{color:var(--muted); font-size:12px}
+
+    table{width:100%; border-collapse:collapse; font-size:14px}
+    th,td{border-bottom:1px dashed var(--border); padding:8px 6px; text-align:left}
+    thead th{font-weight:600; color:var(--muted)}
+    tr.active{background:rgba(116,179,255,.08)}
+
+    /* === Mini calendrier mensuel (remplace les 7 pastilles) === */
+.card.coach-agenda .calendar-head{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:.5rem; margin-bottom:.5rem;
+}
+.card.coach-agenda .calendar-title{font-weight:600}
+.card.coach-agenda .calendar-grid{
+  display:grid; grid-template-columns: repeat(7,1fr);
+  gap:.4rem; align-items:stretch;
+}
+.card.coach-agenda .cal-head{
+  text-align:center; opacity:.7; font-size:.9rem;
+}
+.card.coach-agenda .cal-cell{
+  position:relative; aspect-ratio:1/1; border-radius:.6rem;
+  display:flex; align-items:center; justify-content:center;
+  background: var(--chip-bg, #0f121a);
+  border:1px solid var(--border);
+  font-size:.95rem; cursor:pointer; user-select:none;
+}
+.card.coach-agenda .cal-cell.today{ outline:2px solid var(--blue); }
+.card.coach-agenda .badge{
+  position:absolute; right:.28rem; top:.28rem;
+  width:.55rem; height:.55rem; border-radius:50%;
+}
+.badge.full{background:#ff7a7a}
+.badge.cardio{background:#74b3ff}
+.badge.off{background:#96a2b5}
+.card.coach-agenda .legend{display:flex; gap:1rem; align-items:center; margin-top:.6rem; opacity:.9}
+.card.coach-agenda .dot{display:inline-block;width:.6rem;height:.6rem;border-radius:50%}
+.dot.full{background:#ff7a7a}.dot.cardio{background:#74b3ff}.dot.off{background:#96a2b5}
+.card.coach-agenda .nav-btn{
+  background:transparent; border:1px solid var(--border);
+  border-radius:.5rem; padding:.25rem .5rem; cursor:pointer; color:var(--ink);
+}
+
+/* Controls */
+    .controls .pair{display:grid; grid-template-columns:160px 1fr; gap:10px; align-items:center; margin:8px 0}
+    input[type="range"]{width:100%}
+    .badge{font-size:12px; padding:3px 8px; border-radius:999px; background:var(--chip); color:var(--muted); border:1px solid var(--border)}
+
+    /* Plan blocs (collapsibles) */
+    .stack{display:grid; grid-template-columns:1fr; gap:16px; margin-top:16px}
+    .dayCard{position:relative; border-left:12px solid transparent}
+    .dayCard[data-type="muscu"]{border-left-color:var(--green)}
+    .dayCard[data-type="cardio"]{border-left-color:var(--blue)}
+    .dayCard[data-type="rest"]{border-left-color:var(--gray)}
+    .dayHead{display:flex; align-items:center; gap:10px;}
+    .toggle{appearance:none; background:#1c2533; border:1px solid var(--border); color:var(--ink); padding:6px 8px; border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:6px}
+    .chev{transition:transform .2s ease}
+    .toggle[aria-expanded="false"] .chev{transform:rotate(-90deg)}
+    .titleTxt{font-weight:600}
+    .dayBody{overflow:hidden; transition:max-height .25s ease, opacity .2s ease}
+    .dayCard.is-collapsed .dayBody{max-height:0; opacity:0}
+    .dayCard:not(.is-collapsed) .dayBody{max-height:2000px; opacity:1}
+
+    .fields{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; margin-top:8px}
+    .short{grid-template-columns:repeat(4,minmax(0,1fr))}
+    label{font-size:11px; color:var(--muted)}
+    .cell{display:flex; flex-direction:column; gap:4px}
+    input[type="text"], input[type="number"], textarea{background:var(--chip); border:1px solid var(--border); color:var(--ink); padding:7px 8px; border-radius:10px}
+    textarea{min-height:64px; resize:vertical}
+    .ex{border-top:1px dashed var(--border); padding-top:10px; margin-top:10px}
+  </style>
+</head>
+<body>
+  <div id="page">
+    <h1>Coach — Hebdo + Agenda + Plan</h1>
+
+    <!-- ===== TOP ROW ===== -->
+    <div class="row">
+      <!-- 1) Rappel Hebdo -->
+      <section class="card" id="reminder">
+        <h2>📅 Rappel Hebdo</h2>
+        <table>
+          <thead><tr><th>Jour</th><th>Type</th><th>Objectif</th></tr></thead>
+          <tbody id="remindBody">
+            <tr data-day="1"><td>Lundi</td><td>Full Body A</td><td>Force & structure</td></tr>
+            <tr data-day="2"><td>Mardi</td><td>Cardio (marche + run)</td><td>Zone 2–3, récup active</td></tr>
+            <tr data-day="3"><td>Mercredi</td><td>Full Body B</td><td>Volume + densité</td></tr>
+            <tr data-day="4"><td>Jeudi</td><td>Cardio</td><td>Déstockage, récupération</td></tr>
+            <tr data-day="5"><td>Vendredi</td><td>Full Body C</td><td>Combo + puissance</td></tr>
+            <tr data-day="6"><td>Samedi</td><td>Cardio (libre)</td><td>Mobilisation / HIIT</td></tr>
+            <tr data-day="0"><td>Dimanche</td><td>OFF</td><td>Repos total 🧘‍♂️</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 2) Agenda validation -->
+      <section class="card coach-agenda" id="agenda">
+  <h2>🗓️ Agenda entraînement</h2>
+  <div class="calendar-head">
+    <button class="nav-btn" id="cal-prev" aria-label="Mois précédent">◀</button>
+    <div class="calendar-title" id="cal-title"></div>
+    <button class="nav-btn" id="cal-next" aria-label="Mois suivant">▶</button>
+  </div>
+  <div class="calendar-grid" id="cal-grid"></div>
+  <div class="legend">
+    <span class="dot full"></span> Full Body
+    <span class="dot cardio"></span> Cardio
+    <span class="dot off"></span> Off
+  </div>
+  <div class="toolbar">
+    <button class="btn" id="clearAgenda">Effacer validations</button>
+  </div>
+</section>
+
+      <!-- 3) Réglages progressifs -->
+      <section class="card controls" id="controls">
+        <h2>⚙️ Réglages difficulté</h2>
+        <div class="pair"><span>Offset RPE (−2 à +2)</span><input id="rpeOffset" type="range" min="-2" max="2" step="1" value="0"></div>
+        <div class="pair"><span>+ Charge (points × 0,5 kg)</span><input id="loadPoints" type="range" min="0" max="6" step="1" value="0"></div>
+        <div class="toolbar">
+          <button class="btn" id="applyToday">Appliquer au jour actuel</button>
+          <button class="btn" id="resetAdjust">Réinitialiser le jour</button>
+          <span id="preview" class="badge">Aperçu : RPE +0 • +0.0 kg</span>
+        </div>
+        <p class="muted">Règle simple : +1 RPE ➜ +1 rep; chaque +2 RPE ➜ +1 série. Les charges numériques sont augmentées de (points × 0,5 kg). Sauvegarde locale auto.</p>
+      </section>
+    </div>
+
+    <!-- ===== PLAN COMPLET (collapsible) ===== -->
+    <div class="stack" id="stack">
+
+      <!-- LUNDI -->
+      <section class="card dayCard" data-day="1" data-type="muscu">
+        <div class="dayHead">
+          <button class="toggle" aria-expanded="true" title="Ouvrir/Fermer"><span class="chev">▾</span></button>
+          <span class="titleTxt">🟢 Lundi – Full Body A : Force & Structure</span>
+        </div>
+        <div class="dayBody">
+          <div class="ex" data-ex="Développé couché barre"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="4" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="10" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="10-20" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="2-1-1" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" step="0.5" value="7.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Pecs/Triceps" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Goblet Squat"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="4" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="15" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="5" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="3-1-1" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Jambes/Fessiers/Abdos" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Rowing barre penché"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="4" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="12" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="15-20" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="2-1-2" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Dos/Biceps" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Soulevé de terre jambes tendues"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="12" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="15-20" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="3-1-1" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Ischios/Fessiers/Lombaires" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Pompes sur genoux"><div class="fields short">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="15" data-k="reps"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="6.5" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Triceps/Core" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Crunch au sol"><div class="fields short">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="20" data-k="reps"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="6" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Abdos sans pression" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Planche"><div class="fields short">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Durée</label><input type="text" value="40s" data-k="time"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="6" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Core stable" data-k="notes"></div>
+          </div></div>
+          <div class="ex"><div class="fields short">
+            <div class="cell"><label>Finisher</label><input type="text" value="Vélo 5–8 min Z2" data-k="finisher"></div>
+            <div class="cell"><label>&nbsp;</label><span></span></div>
+            <div class="cell"><label>&nbsp;</label><span></span></div>
+            <div class="cell"><label>&nbsp;</label><span></span></div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- MARDI (Cardio) -->
+      <section class="card dayCard" data-day="2" data-type="cardio">
+        <div class="dayHead"><button class="toggle" aria-expanded="true"><span class="chev">▾</span></button><span class="titleTxt">🔵 Mardi – Cardio : Marche + Run (Z2–3)</span></div>
+        <div class="dayBody">
+          <div class="ex"><div class="fields short">
+            <div class="cell"><label>Échauffement</label><input type="text" value="5 min Z2" data-k="wu"></div>
+            <div class="cell"><label>Bloc</label><input type="text" value="Marche 4 min + Run 1 min × 6" data-k="b1"></div>
+            <div class="cell"><label>Retour</label><input type="text" value="5 min Z2" data-k="cd"></div>
+            <div class="cell"><label>Total</label><input type="text" value="~35 min" data-k="total"></div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- MERCREDI -->
+      <section class="card dayCard" data-day="3" data-type="muscu">
+        <div class="dayHead"><button class="toggle" aria-expanded="true"><span class="chev">▾</span></button><span class="titleTxt">🔵 Mercredi – Full Body B : Volume & Brûlage</span></div>
+        <div class="dayBody">
+          <div class="ex" data-ex="Développé haltères au sol"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="4" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="12" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="3/haltère" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="2-1-2" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Variante pectoraux" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Squat PDC dynamique"><div class="fields short">
+            <div class="cell"><label>Séries</label><input type="number" value="4" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="20" data-k="reps"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Cardio + quad" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Rowing haltère 1 bras"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="15" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="3-5" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="2-1-2" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Contrôle + équilibre" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Hip Thrust sur banc"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="15" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="PDC/charge" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="2-1-1" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Fessiers 🔥" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Élévations latérales"><div class="fields short">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="20" data-k="reps"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="6" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Épaules latérales" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Crunch jambes levées"><div class="fields short">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="20" data-k="reps"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="6" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Abdos + protection" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Gainage genoux relevés"><div class="fields short">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Durée</label><input type="text" value="40s" data-k="time"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="6" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Core + transverse" data-k="notes"></div>
+          </div></div>
+          <div class="ex"><div class="fields short">
+            <div class="cell"><label>Finisher</label><input type="text" value="Marche rapide 10 min" data-k="finisher"></div>
+            <div class="cell"><label>&nbsp;</label><span></span></div>
+            <div class="cell"><label>&nbsp;</label><span></span></div>
+            <div class="cell"><label>&nbsp;</label><span></span></div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- JEUDI (Cardio LISS) -->
+      <section class="card dayCard" data-day="4" data-type="cardio">
+        <div class="dayHead"><button class="toggle" aria-expanded="true"><span class="chev">▾</span></button><span class="titleTxt">🔵 Jeudi – Cardio LISS (marche/tapis)</span></div>
+        <div class="dayBody">
+          <div class="ex"><div class="fields">
+            <div class="cell"><label>Type</label><input type="text" value="Marche rapide" data-k="type"></div>
+            <div class="cell"><label>Vitesse</label><input type="text" value="5.5 km/h" data-k="speed"></div>
+            <div class="cell"><label>Inclinaison</label><input type="text" value="5%" data-k="incline"></div>
+            <div class="cell"><label>Durée</label><input type="text" value="40 min" data-k="time"></div>
+            <div class="cell"><label>FC</label><input type="text" value="Z2" data-k="zone"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Podcast/à jeun (opt)" data-k="notes"></div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- VENDREDI -->
+      <section class="card dayCard" data-day="5" data-type="muscu">
+        <div class="dayHead"><button class="toggle" aria-expanded="true"><span class="chev">▾</span></button><span class="titleTxt">🔴 Vendredi – Full Body C : Puissance & Combo</span></div>
+        <div class="dayBody">
+          <div class="ex" data-ex="Développé militaire assis"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="4" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="10" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="3-5" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="2-1-1" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Épaules/Triceps" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Front Squat"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="4" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="12" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="10-20" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="3-1-1" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7.5" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Cuisses + gainage" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Tirage menton"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="12" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="10-15" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="2-1-2" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Trapèzes/Biceps" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Fentes arrière"><div class="fields">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="10" data-k="reps"></div>
+            <div class="cell"><label>Charge</label><input type="text" value="PDC/haltères" data-k="load"></div>
+            <div class="cell"><label>Tempo</label><input type="text" value="2-1-1" data-k="tempo"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="7" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Fessiers + cuisses" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Pompes inclinées"><div class="fields short">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="12" data-k="reps"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="6.5" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Triceps + pecs" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Crunch rotation"><div class="fields short">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Reps</label><input type="number" value="20" data-k="reps"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="6" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Obliques + centre" data-k="notes"></div>
+          </div></div>
+          <div class="ex" data-ex="Planche + bras"><div class="fields short">
+            <div class="cell"><label>Séries</label><input type="number" value="3" data-k="sets"></div>
+            <div class="cell"><label>Durée</label><input type="text" value="30s" data-k="time"></div>
+            <div class="cell"><label>RPE</label><input type="number" value="6" step="0.5" data-k="rpe"></div>
+            <div class="cell"><label>Notes</label><input type="text" value="Anti-rotation" data-k="notes"></div>
+          </div></div>
+          <div class="ex"><div class="fields short">
+            <div class="cell"><label>Finisher</label><input type="text" value="Vélo 8 min (30/30)" data-k="finisher"></div>
+            <div class="cell"><label>&nbsp;</label><span></span></div>
+            <div class="cell"><label>&nbsp;</label><span></span></div>
+            <div class="cell"><label>&nbsp;</label><span></span></div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- SAMEDI Cardio libre -->
+      <section class="card dayCard" data-day="6" data-type="cardio">
+        <div class="dayHead"><button class="toggle" aria-expanded="true"><span class="chev">▾</span></button><span class="titleTxt">🔴 Samedi – Cardio libre / HIIT</span></div>
+        <div class="dayBody">
+          <div class="ex"><div class="fields">
+            <div class="cell"><label>Option</label><input type="text" value="Cycling/Tapis fractionné" data-k="opt"></div>
+            <div class="cell"><label>Warm‑up</label><input type="text" value="5 min" data-k="wu"></div>
+            <div class="cell"><label>Bloc A</label><input type="text" value="3× (5 min modéré + 1 min rapide)" data-k="a"></div>
+            <div class="cell"><label>Bloc B</label><input type="text" value="2× (2 min modéré + 2 min intense)" data-k="b"></div>
+            <div class="cell"><label>Cooldown</label><input type="text" value="5 min" data-k="cd"></div>
+            <div class="cell"><label>Total</label><input type="text" value="~30 min" data-k="total"></div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- DIMANCHE Repos -->
+      <section class="card dayCard" data-day="0" data-type="rest">
+        <div class="dayHead"><button class="toggle" aria-expanded="true"><span class="chev">▾</span></button><span class="titleTxt">☕ Dimanche – OFF / Récupération</span></div>
+        <div class="dayBody">
+          <div class="ex"><div class="fields short">
+            <div class="cell"><label>Focus</label><input type="text" value="Sommeil, mobilité douce, hydratation" data-k="focus"></div>
+            <div class="cell"><label>Respiration</label><input type="text" value="Capsule nasale 5 min" data-k="breath"></div>
+            <div class="cell"><label>Notes</label><input type="text" placeholder="ressenti" data-k="notes"></div>
+            <div class="cell"><label>&nbsp;</label><span></span></div>
+          </div></div>
+        </div>
+      </section>
+
+    </div>
+
+  </div>
+
+  <script>
+  (function(){
+    const KEY = 'coach_adv_v1';
+    const AGENDA_KEY = KEY + '_agenda';
+    const BASE_KEY = KEY + '_base';
+
+    const todayJS = new Date();
+    let currentDay = todayJS.getDay(); // 0=Dim..6=Sam
+
+    // === Reminder highlight
+    document.querySelectorAll('#remindBody tr').forEach(tr=>{
+      if(Number(tr.dataset.day) === currentDay){ tr.classList.add('active'); }
+    });
+
+    // === Agenda mensuel (remplace la grille hebdo) ===
+const calTitle = document.getElementById('cal-title');
+const calGrid  = document.getElementById('cal-grid');
+const MONTH_KEY = KEY + '_agenda_month';
+const WEEK_START = 1; // lundi
+const planJour = {1:'full',2:'cardio',3:'full',4:'cardio',5:'full',6:'cardio',0:'off'}; // Dim=0
+let calState = {year: new Date().getFullYear(), month: new Date().getMonth()};
+
+function fmtDate(d){ return d.toISOString().slice(0,10); }
+function loadMonth(){ try { return JSON.parse(localStorage.getItem(MONTH_KEY) || '{}'); } catch(e){ return {}; } }
+function saveMonth(v){ localStorage.setItem(MONTH_KEY, JSON.stringify(v)); }
+
+function renderCalendar(){
+  if(!calGrid) return;
+  const {year,month} = calState;
+  const first = new Date(year, month, 1);
+  const last  = new Date(year, month+1, 0);
+  const todayStr = fmtDate(new Date());
+  calTitle.textContent = first.toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+
+  calGrid.innerHTML = '';
+  // En-têtes jours
+  const heads = ['L','M','M','J','V','S','D'];
+  heads.forEach(h=>{
+    const hd=document.createElement('div'); hd.className='cal-head'; hd.textContent=h; calGrid.appendChild(hd);
+  });
+
+  // padding
+  const pad = ((first.getDay() - WEEK_START + 7) % 7);
+  for(let i=0;i<pad;i++){ calGrid.appendChild(document.createElement('div')); }
+
+  const valids = loadMonth();
+
+  // jours
+  for(let d=1; d<=last.getDate(); d++){
+    const date = new Date(year, month, d);
+    const key = fmtDate(date);
+    const cell = document.createElement('button');
+    cell.type='button'; cell.className='cal-cell'; cell.textContent = d;
+    if(key===todayStr) cell.classList.add('today');
+
+    const dow = date.getDay();
+    const type = planJour[dow] || 'off';
+
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    if(valids[key]) badge.classList.add(valids[key]); // full/cardio/off
+    cell.appendChild(badge);
+
+    cell.addEventListener('click', ()=>{
+      const cur = loadMonth();
+      if(cur[key]){ delete cur[key]; badge.className='badge'; }
+      else { cur[key]=type; badge.className='badge '+type; }
+      saveMonth(cur);
+    });
+
+    calGrid.appendChild(cell);
+  }
+}
+
+document.getElementById('cal-prev')?.addEventListener('click', ()=>{
+  calState.month--; if(calState.month<0){ calState.month=11; calState.year--; } renderCalendar();
+});
+document.getElementById('cal-next')?.addEventListener('click', ()=>{
+  calState.month++; if(calState.month>11){ calState.month=0; calState.year++; } renderCalendar();
+});
+renderCalendar();
+
+// === Collapsibles
+    document.querySelectorAll('.dayCard').forEach(card=>{
+      const btn = card.querySelector('.toggle');
+      btn.addEventListener('click', ()=>{
+        const col = card.classList.toggle('is-collapsed');
+        btn.setAttribute('aria-expanded', String(!col));
+      });
+    });
+
+    // Open current day, collapse others
+    document.querySelectorAll('.dayCard').forEach(card=>{
+      const d = Number(card.getAttribute('data-day'));
+      const btn = card.querySelector('.toggle');
+      const isToday = d===currentDay;
+      card.classList.toggle('is-collapsed', !isToday);
+      btn.setAttribute('aria-expanded', String(isToday));
+    });
+
+    // === Persist base values (first time) for progressive adjustments
+    if(!localStorage.getItem(BASE_KEY)){
+      const snapshot = {};
+      document.querySelectorAll('.dayCard').forEach(card=>{
+        const d = card.getAttribute('data-day');
+        const exos = {};
+        card.querySelectorAll('.ex').forEach(ex=>{
+          const name = ex.dataset.ex || 'exo';
+          const fields = {};
+          ex.querySelectorAll('input').forEach(inp=>{ const k = inp.dataset.k; if(k) fields[k]=inp.value; });
+          exos[name]=fields;
+        });
+        snapshot[d]=exos;
+      });
+      localStorage.setItem(BASE_KEY, JSON.stringify(snapshot));
+    }
+
+    // === Controls logic
+    const rpeSlider = document.getElementById('rpeOffset');
+    const loadSlider = document.getElementById('loadPoints');
+    const preview = document.getElementById('preview');
+    function syncPreview(){ preview.textContent = `Aperçu : RPE ${Number(rpeSlider.value)>=0?'+':''}${rpeSlider.value} • +${(Number(loadSlider.value)*0.5).toFixed(1)} kg`; }
+    rpeSlider.addEventListener('input', syncPreview);
+    loadSlider.addEventListener('input', syncPreview); syncPreview();
+
+    function applyAdjust(day){
+      const base = JSON.parse(localStorage.getItem(BASE_KEY)||'{}')[day];
+      if(!base) return;
+      const rpeOff = Number(rpeSlider.value);
+      const extraKg = Number(loadSlider.value)*0.5;
+      const card = document.querySelector(`.dayCard[data-day="${day}"]`);
+      if(!card) return;
+      card.querySelectorAll('.ex').forEach(ex=>{
+        const name = ex.dataset.ex || 'exo';
+        const fields = base[name] || {};
+        // Start from base
+        const sets = Number(fields['sets']||ex.querySelector('[data-k="sets"]').value||0);
+        const reps = Number(fields['reps']||ex.querySelector('[data-k="reps"]').value||0);
+        const rpe  = Number(fields['rpe'] || ex.querySelector('[data-k="rpe"]').value||0);
+        const load = (fields['load']||'').toString();
+
+        // Rule: +1 RPE => +1 rep; every +2 RPE => +1 set; negative reduces (kept >= base min 1)
+        let newReps = reps + rpeOff;
+        let newSets = sets + Math.floor((rpeOff)/2);
+        if(newReps < 1) newReps = 1; if(newSets < 1) newSets = 1;
+
+        // Load: increment numeric parts by +extraKg
+        let newLoad = load.replace(/(\d+(?:\.\d+)?)/g, (m)=> (parseFloat(m)+extraKg).toString());
+
+        // Push back to UI
+        const rI = ex.querySelector('[data-k="reps"]'); if(rI) rI.value = String(newReps);
+        const sI = ex.querySelector('[data-k="sets"]'); if(sI) sI.value = String(newSets);
+        const lI = ex.querySelector('[data-k="load"]'); if(lI && load) lI.value = newLoad;
+        const rpI = ex.querySelector('[data-k="rpe"]'); if(rpI) rpI.value = (rpe + rpeOff).toFixed(1).replace(/\.0$/, '');
+      });
+    }
+
+    function resetDay(day){
+      const base = JSON.parse(localStorage.getItem(BASE_KEY)||'{}')[day];
+      if(!base) return;
+      const card = document.querySelector(`.dayCard[data-day="${day}"]`);
+      if(!card) return;
+      card.querySelectorAll('.ex').forEach(ex=>{
+        const name = ex.dataset.ex || 'exo';
+        const f = base[name]||{};
+        for(const [k,v] of Object.entries(f)){
+          const inp = ex.querySelector(`[data-k="${k}"]`); if(inp) inp.value = v;
+        }
+      });
+    }
+
+    document.getElementById('applyToday').addEventListener('click', ()=> applyAdjust(currentDay));
+    document.getElementById('resetAdjust').addEventListener('click', ()=> resetDay(currentDay));
+
+    // Auto‑update at midnight (changes highlight/open day)
+    let dayStamp = new Date().toDateString();
+    setInterval(()=>{
+      const now = new Date();
+      if(now.toDateString()!==dayStamp){ location.reload(); }
+    }, 60000);
+  })();
+  </script>
+</body>
+</html>

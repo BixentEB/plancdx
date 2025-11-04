@@ -1,0 +1,149 @@
+<div class="card">
+  <h2>Programme A — Semaine courante</h2>
+  <p class="hint">
+    Ceci est la vue de ton <strong>plan actif</strong>. Pour construire une variante sans toucher à ce plan,
+    utilise l’onglet <em>Encyclopédie / Maquette B</em> puis <strong>Copier B → A</strong> quand tu es prêt.
+  </p>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 12px">
+    <button id="planCopyAtoB" class="btn small">Copier A → B (maquette)</button>
+    <button id="planCopyBtoA" class="btn small primary">Copier B → A (remplacer A)</button>
+  </div>
+
+  <div id="plan-root" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px"></div>
+</div>
+
+<script>
+(function(){
+  const root = document.getElementById('plan-root');
+  if(!window.V5 || !root){
+    const warn = document.createElement('div');
+    warn.className='hint';
+    warn.textContent = 'Router non initialisé.';
+    document.body.appendChild(warn);
+    return;
+  }
+
+  const dayNames  = ['','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+  const dayShort  = ['','Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const typeColor = { full:'#ffaa44', cardio:'#66c1ff', off:'#666', tibo:'#ff6699', core:'#9be7a5' };
+
+  function detectType(day){
+    // préférer type stocké, sinon inférer selon items
+    if(day?.type) return day.type;
+    const hasCardio = (day?.items||[]).some(x => x.type==='cardio' || x.type==='tibo');
+    const hasMuscu  = (day?.items||[]).some(x => x.type==='muscu'  || x.type==='core');
+    if(hasCardio && !hasMuscu) return 'cardio';
+    if(hasMuscu && !hasCardio) return 'full';
+    if(!hasCardio && !hasMuscu) return 'off';
+    return 'full';
+  }
+
+  function chip(txt){
+    const s=document.createElement('span');
+    s.className='chip';
+    s.textContent = txt;
+    return s;
+  }
+
+  function cardForDay(idx, day){
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const type = detectType(day);
+    const h = document.createElement('h3');
+    h.style.display = 'flex';
+    h.style.justifyContent = 'space-between';
+    h.style.alignItems = 'center';
+    h.innerHTML = `<span>${dayNames[idx]}</span><span class="chip" style="background:${typeColor[type]||'#444'};color:#000">${type.toUpperCase()}</span>`;
+    card.appendChild(h);
+
+    const list = document.createElement('div');
+    list.style.display='flex';
+    list.style.flexDirection='column';
+    list.style.gap='6px';
+
+    const items = (day?.items||[]);
+    if(!items.length){
+      const p=document.createElement('p');
+      p.className='hint';
+      p.textContent='Aucun exercice pour ce jour.';
+      list.appendChild(p);
+    } else {
+      items.forEach(it=>{
+        const row=document.createElement('div');
+        row.style.background='#202022';
+        row.style.border='1px solid #2b2b2e';
+        row.style.borderRadius='8px';
+        row.style.padding='8px';
+
+        const head=document.createElement('div');
+        head.style.display='flex';
+        head.style.justifyContent='space-between';
+        head.style.gap='8px';
+        head.innerHTML = `<strong>${it.name}</strong><span class="meta">${(it.type||'').toUpperCase()}</span>`;
+        row.appendChild(head);
+
+        const meta=document.createElement('div');
+        meta.style.marginTop='4px';
+        meta.style.display='flex';
+        meta.style.flexWrap='wrap';
+        meta.style.gap='6px';
+
+        if(it.type==='muscu'){
+          const v=it.vals||{};
+          meta.appendChild(chip((v.sets??'?')+'×'+(v.reps??'?')));
+          if(v.load)  meta.appendChild(chip(String(v.load)));
+          if(v.tempo) meta.appendChild(chip('Tempo '+v.tempo));
+          if(v.rpe!=null) meta.appendChild(chip('RPE '+v.rpe));
+          meta.appendChild(chip('Repos '+(v.rest||'90s')));
+        } else if(it.type==='cardio'){
+          const v=it.vals||{};
+          meta.appendChild(chip((v.total??'?')+' min'));
+          meta.appendChild(chip('WU '+(v.wu??'?')));
+          if(v.bloc) meta.appendChild(chip(String(v.bloc)));
+          meta.appendChild(chip('CD '+(v.cd??'?')));
+        } else if(it.type==='tibo'){
+          const v=it.vals||{};
+          meta.appendChild(chip((v.total??'?')+' min'));
+          meta.appendChild(chip('WU '+(v.wu??'5')));
+          meta.appendChild(chip(v.bloc?String(v.bloc):'3’/3’ × ?'));
+          meta.appendChild(chip('CD '+(v.cd??'5')));
+        } else if(it.type==='core'){
+          const v=it.vals||{};
+          meta.appendChild(chip((v.sets??'?')+'×'+(v.sec??'?')+'s'));
+          if(v.rpe!=null) meta.appendChild(chip('RPE '+v.rpe));
+        } else {
+          // fallback
+          meta.appendChild(chip('Libre'));
+        }
+
+        row.appendChild(meta);
+        list.appendChild(row);
+      });
+    }
+
+    card.appendChild(list);
+    return card;
+  }
+
+  function render(){
+    root.innerHTML='';
+    const s = V5.getState();
+    const prog = s.programA || {};
+    for(let i=1; i<=7; i++){
+      root.appendChild(cardForDay(i, prog[i]||{items:[]}));
+    }
+  }
+
+  document.getElementById('planCopyAtoB')?.addEventListener('click', ()=>{
+    V5.copyAtoB();
+  });
+  document.getElementById('planCopyBtoA')?.addEventListener('click', ()=>{
+    V5.copyBtoA();
+    render(); // reflète le nouveau A
+  });
+
+  render();
+})();
+</script>

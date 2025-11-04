@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cap·Actifs — Cure 120 jours (agenda top) + Export/Import — fix dates</title>
+<style>
+  :root{
+    --bg:#0b0f14;--panel:#121821;--panel2:#0f1726;--line:#1f2a3a;
+    --text:#e6edf3;--sub:#9fb2c7;--accent:#58a6ff;--ok:#22c55e;
+    --radius:14px;--shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  html,body{height:100%}
+  body{
+    margin:0;background:
+      radial-gradient(1200px 800px at 15% -10%, #182131 0%, transparent 60%),
+      radial-gradient(1200px 800px at 120% 0%, #101827 0%, transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font:500 15px/1.5 Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap{max-width:1100px;margin:32px auto;padding:0 16px}
+
+  .top{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-bottom:16px}
+  @media (max-width:960px){.top{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#121a27,#0f1520);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .inner{padding:16px 18px}
+  h1{font-size:22px;margin:0 0 8px}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .tag{font-size:12px;padding:6px 8px;border-radius:10px;border:1px solid #263750;background:#0f1726;color:#cfe1ff}
+
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+  @media (max-width:640px){.controls{grid-template-columns:1fr}}
+  label{display:block;font-size:12px;color:var(--sub);margin:0 0 6px}
+  input[type=date],select{width:100%;background:#0e1522;border:1px solid #233045;border-radius:12px;padding:10px;color:#e6edf3}
+
+  .actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+  .btn{appearance:none;border:none;border-radius:12px;padding:11px 14px;font-weight:700;letter-spacing:.2px;cursor:pointer}
+  .btn.primary{background:linear-gradient(180deg,#2b72ff,#1a56db);color:#fff;box-shadow:0 6px 16px rgba(35,109,255,.28)}
+  .btn.ok{background:linear-gradient(180deg,#22c55e,#179a46);color:#fff}
+  .btn.secondary{background:#1b2535;color:#e2e8f0;border:1px solid #2a3a53}
+  .btn.ghost{background:transparent;border:1px dashed #2b3d57;color:#a9bed7}
+
+  .progress{margin-top:10px;height:12px;background:#0e1522;border:1px solid #22324a;border-radius:999px;overflow:hidden}
+  .bar{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#58a6ff)}
+  .stats{display:flex;gap:14px;margin-top:8px;font-size:13px;color:#9fb2c7}
+
+  details.phase{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#0f1726,#0b1220);margin-bottom:12px}
+  details.phase[open]{background:linear-gradient(180deg,#101a31,#0b1323)}
+  .ph-summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .ph-summary::-webkit-details-marker{display:none}
+  .dot{width:10px;height:10px;border-radius:3px}
+  .ph-body{padding:6px 0}
+
+  .row{display:grid;grid-template-columns:90px 1fr 170px 110px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid #142033}
+  .row:last-child{border-bottom:none}
+  .pill{font-size:11px;padding:3px 8px;border-radius:999px;background:#1a2740;color:#a8c2df;border:1px solid #2a3b5a;display:inline-block}
+  .date{font-size:12px;color:#9fb2c7}
+  .dose{font-size:12px;color:#c6ddf9}
+  .status{display:flex;align-items:center;gap:6px}
+  .square{width:12px;height:12px;border-radius:3px;border:1px solid #22324a;background:#0e1522}
+  .square.ok{background:var(--ok);border-color:#1a7b45}
+  .row.sel{outline:2px solid #2b72ff;outline-offset:-2px;background:linear-gradient(180deg,#0c1830,#0b1426)}
+  .row.today{box-shadow:inset 0 0 0 2px #3b82f6}
+  .row.done{background:linear-gradient(180deg,#0e1f15,#0b1611)}
+
+  .agenda .ag-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line)}
+  .agenda .title{font-weight:800}
+  .agenda .nav{display:flex;gap:6px}
+  .agenda .navbtn{width:30px;height:30px;border-radius:10px;background:#0f1726;border:1px solid #22324a;color:#cfe1ff;cursor:pointer}
+  .agenda .legend{display:flex;gap:10px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);color:#a9bed7;font-size:12px}
+  .agenda .grid{padding:10px 10px}
+  .week{display:grid;grid-template-columns:28px repeat(7,1fr);gap:6px;margin-bottom:6px}
+  .wcell{display:flex;align-items:center;justify-content:center;font-size:10px;color:#9fb2c7}
+  .cell{height:28px;border-radius:9px;border:1px solid #22324a;background:#0e1522;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;position:relative}
+  .cell.muted{opacity:.45}
+  .cell.sel{outline:2px solid #3b82f6;outline-offset:-2px}
+  .cell.ok{background:var(--ok);color:#03210f;border-color:#1a7b45}
+  .cell.disabled{opacity:.22;filter:grayscale(.6)}
+  .weeknum{font-size:10px;color:#8aa4be}
+
+  .foot{margin:10px 0 4px;text-align:center;color:#7790a8;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="card">
+      <div class="inner">
+        <h1>Suivi Cap·Actifs — 120 jours</h1>
+
+        <div class="legend" id="legend"></div>
+
+        <div class="controls">
+          <div>
+            <label for="start">Date de début</label>
+            <input type="date" id="start">
+          </div>
+          <div>
+            <label for="pickDay">Sélection manuelle d'un jour</label>
+            <select id="pickDay"></select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn ok" id="validateSelected">Valider le jour sélectionné</button>
+          <button class="btn primary" id="validateToday">Valider aujourd'hui</button>
+          <button class="btn secondary" id="reset">Réinitialiser</button>
+          <button class="btn ghost" id="exportBtn">Exporter</button>
+          <button class="btn ghost" id="importBtn">Importer</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none" />
+        </div>
+
+        <div class="progress" title="Progression">
+          <div class="bar" id="bar"></div>
+        </div>
+        <div class="stats" id="stats"></div>
+      </div>
+    </div>
+
+    <div class="card agenda">
+      <div class="ag-head">
+        <div class="title" id="agTitle">Agenda</div>
+        <div class="nav">
+          <button class="navbtn" id="prevM">◀</button>
+          <button class="navbtn" id="todayM">•</button>
+          <button class="navbtn" id="nextM">▶</button>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="weeknum">#</span>
+        <span><span class="cell" style="width:12px;height:12px;border-radius:3px;margin-right:6px"></span> À faire</span>
+        <span><span class="cell ok" style="width:12px;height:12px;border-radius:3px;margin-right:6px"></span> Validé</span>
+        <span><span class="cell sel" style="width:12px;height:12px;border-radius:3px;margin-right:6px"></span> Sélectionné</span>
+      </div>
+      <div class="grid" id="agenda"></div>
+    </div>
+  </div>
+
+  <div id="phases"></div>
+
+  <div class="foot">Export/Import robustes — formats de date ISO et FR acceptés, toujours normalisés en ISO.</div>
+</div>
+
+<script>
+(function(){
+  const SCHEMA_VERSION = 2;                 // ⇦ bump version
+  const KEY = 'capactifs_cure_v6';          // ⇦ nouvelle clé (pour éviter l’ancien état durant test)
+  const plan = [
+    { name:'P1 Attaque', dose:2, days:15, color:'#6aa6ff' },
+    { name:'P2 Attaque', dose:3, days:30, color:'#7be495' },
+    { name:'P1 Entretien', dose:1, days:30, color:'#f6c453' },
+    { name:'P2 Entretien', dose:2, days:45, color:'#b388ff' },
+  ];
+  const totalDays = plan.reduce((a,p)=>a+p.days,0);
+
+  // --- Utils: date normalization ---
+  function normalizeDate(input){
+    if(typeof input !== 'string') return null;
+    // ISO: YYYY-MM-DD
+    const iso = input.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(iso){
+      const y=+iso[1], m=+iso[2], d=+iso[3];
+      if(y<2000 || y>2100) return null;
+      const dt = new Date(Date.UTC(y,m-1,d));
+      if(dt.getUTCMonth()+1!==m || dt.getUTCDate()!==d) return null;
+      return `${y.toString().padStart(4,'0')}-${iso[2]}-${iso[3]}`;
+    }
+    // FR: DD/MM/YYYY
+    const fr = input.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if(fr){
+      const d=+fr[1], m=+fr[2], y=+fr[3];
+      if(y<2000 || y>2100) return null;
+      const dt = new Date(Date.UTC(y,m-1,d));
+      if(dt.getUTCMonth()+1!==m || dt.getUTCDate()!==d) return null;
+      return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    }
+    return null;
+  }
+
+  // --- Elements ---
+  const els = {
+    legend: document.getElementById('legend'),
+    phases: document.getElementById('phases'),
+    start: document.getElementById('start'),
+    pickDay: document.getElementById('pickDay'),
+    validateSelected: document.getElementById('validateSelected'),
+    validateToday: document.getElementById('validateToday'),
+    reset: document.getElementById('reset'),
+    exportBtn: document.getElementById('exportBtn'),
+    importBtn: document.getElementById('importBtn'),
+    importFile: document.getElementById('importFile'),
+    bar: document.getElementById('bar'),
+    stats: document.getElementById('stats'),
+    agenda: document.getElementById('agenda'),
+    agTitle: document.getElementById('agTitle'),
+    prevM: document.getElementById('prevM'),
+    todayM: document.getElementById('todayM'),
+    nextM: document.getElementById('nextM')
+  };
+
+  // --- State ---
+  let state = migrate(load()) || defaultState();
+
+  function defaultState(){
+    const t = new Date();
+    const iso = t.toISOString().slice(0,10);
+    return {
+      _schema: SCHEMA_VERSION,
+      startDate: iso,           // toujours ISO
+      selectedDay: 1,
+      days: Array.from({length:totalDays}, _=>({done:false, ts:null})),
+      calYear: t.getFullYear(),
+      calMonth: t.getMonth()
+    };
+  }
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+  function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+  // Migration/normalisation : accepte anciens schémas et dates FR
+  function migrate(data){
+    if(!data) return null;
+    if(typeof data !== 'object') return null;
+    const iso = normalizeDate(data.startDate);
+    if(!iso) return null; // on repartira sur défaut
+    data.startDate = iso;
+    if(!Array.isArray(data.days) || data.days.length!==totalDays){
+      data.days = Array.from({length:totalDays}, _=>({done:false, ts:null}));
+    }
+    if(typeof data.selectedDay!=='number') data.selectedDay=1;
+    if(typeof data.calYear!=='number' || typeof data.calMonth!=='number'){
+      const t=new Date(); data.calYear=t.getFullYear(); data.calMonth=t.getMonth();
+    }
+    data._schema = SCHEMA_VERSION;
+    return data;
+  }
+
+  // --- UI legend ---
+  plan.forEach(p=>{
+    const item = document.createElement('div');
+    item.className = 'tag';
+    item.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${p.color};margin-right:6px"></span>${p.name} — ${p.dose} gél./j · ${p.days} j`;
+    els.legend.appendChild(item);
+  });
+
+  // --- Inputs ---
+  els.start.value = state.startDate;
+  els.start.addEventListener('change', ()=>{
+    const iso = normalizeDate(els.start.value) || normalizeDate(els.start.value.split('-').reverse().join('/')); // fallback
+    if(!iso){ alert("Date invalide. Utilise le sélecteur."); els.start.value = state.startDate; return; }
+    state.startDate = iso; save(); renderAll();
+  });
+  els.pickDay.addEventListener('change', ()=>{ state.selectedDay = parseInt(els.pickDay.value,10); save(); renderAll(); });
+
+  // --- Buttons ---
+  els.validateSelected.addEventListener('click',()=> markDone(state.selectedDay));
+  els.validateToday.addEventListener('click',()=>{
+    const idx = dayIndexFromDate(new Date());
+    if(idx>=1 && idx<=totalDays){ state.selectedDay = idx; els.pickDay.value = idx; markDone(idx); }
+    else alert("Le jour courant n'est pas dans la fenêtre de cure (vérifie la date de début).");
+  });
+  els.reset.addEventListener('click',()=>{
+    if(confirm('Réinitialiser toute la cure ?')){ state = defaultState(); els.start.value = state.startDate; save(); renderAll(); }
+  });
+
+  // --- Export / Import ---
+  els.exportBtn.addEventListener('click', exportData);
+  els.importBtn.addEventListener('click', ()=> els.importFile.click());
+  els.importFile.addEventListener('change', handleImportFile);
+
+  function exportData(){
+    // force ISO avant export
+    state.startDate = normalizeDate(state.startDate) || state.startDate;
+    const clean = JSON.stringify(state, null, 2);
+    const blob = new Blob([clean], {type:'application/json'});
+    const a = document.createElement('a');
+    const pad = n=>String(n).padStart(2,'0');
+    const now = new Date();
+    a.href = URL.createObjectURL(blob);
+    a.download = `capactifs_backup_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}h${pad(now.getMinutes())}.json`;
+    document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+  }
+
+  function handleImportFile(ev){
+    const file = ev.target.files[0];
+    ev.target.value = '';
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const data = JSON.parse(reader.result);
+        const ok = validateSchema(data);
+        if(!ok.ok){ alert('Fichier invalide : '+ok.reason); return; }
+        const iso = normalizeDate(data.startDate);
+        const done = data.days.filter(x=>x.done).length;
+        const go = confirm(`Importer ?\n\nDébut: ${iso}\nJours validés: ${done}/${totalDays}\nSélection: jour ${data.selectedDay}`);
+        if(!go) return;
+        data.startDate = iso;
+        state = migrate(data) || defaultState();
+        save(); renderAll();
+      }catch(e){ alert('Impossible de lire ce fichier JSON.'); }
+    };
+    reader.readAsText(file, 'utf-8');
+  }
+
+  function validateSchema(d){
+    if(typeof d!=='object' || !d) return {ok:false, reason:'format JSON absent/incorrect'};
+    // accepte ISO ou FR
+    if(!normalizeDate(d.startDate)) return {ok:false, reason:'date de début invalide'};
+    if(typeof d.selectedDay!=='number' || d.selectedDay<1 || d.selectedDay>totalDays) return {ok:false, reason:'selectedDay invalide'};
+    if(!Array.isArray(d.days) || d.days.length!==totalDays) return {ok:false, reason:'taille des jours incorrecte (doit être 120)'};
+    for(const it of d.days){
+      if(typeof it.done!=='boolean') return {ok:false, reason:'champ "done" manquant/incorrect'};
+      if(!(it.ts===null || typeof it.ts==='number')) return {ok:false, reason:'champ "ts" invalide'};
+    }
+    if(typeof d.calYear!=='number' || typeof d.calMonth!=='number') return {ok:false, reason:'infos agenda manquantes'};
+    return {ok:true};
+  }
+
+  // --- Helpers ---
+  function phaseIdxForDay(idx){ let n=idx, i=0; for(const p of plan){ if(n<=p.days) return i; n-=p.days; i++; } return 0; }
+  function dateForIndex(idx){
+    const start = new Date((state.startDate)+'T00:00:00');
+    const d = new Date(start.getTime() + (idx-1)*86400000);
+    return d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'});
+  }
+  function dayIndexFromDate(d){
+    const s = new Date((state.startDate)+'T00:00:00');
+    const diff = Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()) - Date.UTC(s.getFullYear(),s.getMonth(),s.getDate()))/86400000);
+    return diff+1;
+  }
+  function inCureRange(dateObj){
+    const idx = dayIndexFromDate(dateObj);
+    return idx>=1 && idx<=totalDays ? idx : null;
+  }
+  function isoWeekNumber(date){
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate()+4-dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+  }
+  function populateSelect(){
+    const sel = els.pickDay;
+    sel.innerHTML = '';
+    for(let i=1;i<=totalDays;i++){
+      const o=document.createElement('option');
+      o.value=i;o.textContent=`Jour ${i}`;
+      sel.appendChild(o);
+    }
+    sel.value = state.selectedDay;
+  }
+
+  function markDone(idx){
+    const i = idx-1;
+    if(i<0 || i>=state.days.length) return;
+    if(!state.days[i].done){ state.days[i].done = true; state.days[i].ts = Date.now(); }
+    save(); renderAll();
+  }
+  function openPhaseFor(idx){
+    const pIdx = phaseIdxForDay(idx);
+    document.querySelectorAll('details.phase').forEach((d,i)=>{ d.open = (i===pIdx); });
+  }
+
+  // --- Renders ---
+  function renderPhases(){
+    els.phases.innerHTML = '';
+    let cursor = 1;
+    plan.forEach((p,pi)=>{
+      const details = document.createElement('details');
+      details.className='phase'; details.id='phase_'+pi; details.open=(pi===0);
+      const sum = document.createElement('summary');
+      sum.className='ph-summary';
+      sum.innerHTML = `<div class="dot" style="background:${p.color}"></div>
+        <h3 style="margin:0;font-size:15px">${p.name} — <span style="color:#cfe1ff">${p.dose} gélules/j</span> • <span style="color:#9fb2c7">${p.days} jours</span></h3>`;
+      details.appendChild(sum);
+      const body = document.createElement('div'); body.className='ph-body';
+
+      for(let k=1;k<=p.days;k++){
+        const idx = cursor, d = state.days[idx-1];
+        const todayIdx = dayIndexFromDate(new Date());
+        const row = document.createElement('div');
+        row.className = 'row'+(d.done?' done':'')+(state.selectedDay===idx?' sel':'')+(todayIdx===idx?' today':'');
+        row.innerHTML = `
+          <div><span class="pill">Jour ${idx}</span></div>
+          <div class="date">${dateForIndex(idx)}</div>
+          <div class="dose">Dose cible : <b>${p.dose} gélules</b></div>
+          <div class="status"><span class="square ${d.done?'ok':''}"></span><span>${d.done?'Validé':'À faire'}</span></div>`;
+        row.addEventListener('click', ()=>{ state.selectedDay = idx; save(); renderAll(); });
+        body.appendChild(row); cursor++;
+      }
+      details.appendChild(body);
+      els.phases.appendChild(details);
+      details.addEventListener('toggle', ()=>{ if(details.open){ document.querySelectorAll('details.phase').forEach(d=>{ if(d!==details) d.open=false; }); }});
+    });
+    openPhaseFor(state.selectedDay);
+  }
+
+  function renderProgress(){
+    const done = state.days.filter(d=>d.done).length;
+    const pct = Math.round((done/totalDays)*100);
+    els.bar.style.width = pct+'%';
+    els.stats.innerHTML = `<div><b>${done}/${totalDays}</b> jours validés</div><div>${pct}% complété</div>`;
+  }
+
+  function renderAgenda(){
+    const y = state.calYear, m = state.calMonth;
+    els.agTitle.textContent = `${new Date(y,m,1).toLocaleDateString('fr-FR',{month:'long', year:'numeric'})}`;
+
+    const head = document.createElement('div');
+    head.className = 'week';
+    const h0 = document.createElement('div'); h0.className='wcell'; h0.textContent='#'; head.appendChild(h0);
+    ['L','M','M','J','V','S','D'].forEach(d=>{ const c=document.createElement('div'); c.className='wcell'; c.textContent=d; head.appendChild(c); });
+
+    const first = new Date(y,m,1);
+    const start = new Date(first);
+    const day = (first.getDay()||7);
+    start.setDate(first.getDate() - (day-1));
+
+    const wrap = document.createElement('div');
+    wrap.appendChild(head);
+
+    let d = new Date(start);
+    for(let w=0; w<6; w++){
+      const row = document.createElement('div'); row.className='week';
+      const wk = document.createElement('div'); wk.className='wcell weeknum'; wk.textContent = isoWeekNumber(d);
+      row.appendChild(wk);
+
+      for(let i=0;i<7;i++){
+        const cell = document.createElement('div'); cell.className='cell';
+        const inMonth = (d.getMonth()===m); if(!inMonth) cell.classList.add('muted');
+        const idx = inCureRange(d);
+        if(idx){
+          if(state.days[idx-1].done) cell.classList.add('ok');
+          if(state.selectedDay===idx) cell.classList.add('sel');
+        } else cell.classList.add('disabled');
+
+        cell.textContent = d.getDate();
+        const clickDate = new Date(d.getTime());
+        cell.addEventListener('click', ()=>{
+          const testIdx = inCureRange(clickDate);
+          if(testIdx){ state.selectedDay = testIdx; save(); renderAll(); }
+        });
+
+        row.appendChild(cell);
+        d.setDate(d.getDate()+1);
+      }
+      wrap.appendChild(row);
+      if(d.getMonth()!==m && d.getDate()>=7) break;
+    }
+    els.agenda.innerHTML = ''; els.agenda.appendChild(wrap);
+  }
+
+  function renderAll(){ populateSelect(); renderPhases(); renderProgress(); renderAgenda(); }
+
+  // Init
+  renderAll();
+})();
+</script>
+</body>
+</html>

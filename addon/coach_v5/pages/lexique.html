@@ -1,0 +1,53 @@
+<div class="card">
+  <h2>Lexique — Termes & zones</h2>
+
+  <input id="lex-q" type="search" placeholder="Rechercher un terme (ex: WU, RPE, tempo, Z2…)"
+         style="width:100%; background:#151517; color:#eee; border:1px solid #2b2b2e; padding:8px 10px; border-radius:8px; margin-bottom:10px">
+
+  <div id="lex-list" class="list"></div>
+</div>
+
+<script>
+(function(){
+  const terms = [
+    {k:'WU', t:'Warm-up (échauffement)', d:'Phase préparatoire à intensité faible pour activer le système cardio-respiratoire, lubrifier les articulations et monter la température corporelle.'},
+    {k:'CD', t:'Cool-down (retour au calme)', d:'Phase de récupération active à faible intensité pour faire redescendre progressivement la fréquence cardiaque et accélérer l’évacuation des métabolites.'},
+    {k:'RPE', t:'Rate of Perceived Exertion', d:"Échelle d’effort ressenti (généralement 1 à 10). 7–8 = dur mais contrôlé ; 9 = très dur ; 10 = max absolu."},
+    {k:'Tempo', t:'Tempo d’exécution', d:"Schéma temps (ex: 2-1-1) = phase excentrique – pause – concentrique. Exemple 2-1-1 : 2s descente, 1s stop, 1s montée."},
+    {k:'PDC', t:'Poids du corps', d:'Exercice réalisé sans charge externe.'},
+    {k:'Z2', t:'Zone 2 (aérobie facile)', d:'Endurance fondamentale. Conversation possible, respiration nasale ok. Idéal pour récupérer et améliorer le fond cardio.'},
+    {k:'Z3', t:'Zone 3 (tempo)', d:'Soutenu mais stable ; conversation hachée. Sert à élever le seuil sans trop de fatigue.'},
+    {k:'Z4/Z5', t:'Seuil/VO2', d:'Intervalles intenses (court à moyen). Réservé aux blocs spécifiques et HIIT/TIBO.'},
+    {k:'HIIT', t:'High-Intensity Interval Training', d:'Alternance d’efforts très intenses et de récupérations courtes. Très efficace pour la dépense énergétique.'},
+    {k:'Finisher', t:'Bloc final', d:'Petit module optionnel (ex: 5–8 min vélo Z2) pour augmenter la dépense sans nuire à la récupération.'},
+    {k:'Core', t:'Ceinture abdominale', d:"Travail de stabilité (gainage, anti-rotation) pour protéger la colonne et transférer la force."}
+  ];
+
+  const list = document.getElementById('lex-list');
+  const q    = document.getElementById('lex-q');
+
+  function card(x){
+    const d = document.createElement('div');
+    d.className = 'cardExo';
+    d.innerHTML = `
+      <div class="title">${x.k} — ${x.t}</div>
+      <div class="meta">${x.d}</div>
+    `;
+    return d;
+  }
+
+  function render(){
+    const s = (q.value||'').toLowerCase();
+    list.innerHTML = '';
+    terms.filter(x=>{
+      const hay=(x.k+' '+x.t+' '+x.d).toLowerCase();
+      return hay.includes(s);
+    }).forEach(x=> list.appendChild(card(x)));
+    if(!list.children.length){
+      const p=document.createElement('p'); p.className='hint'; p.textContent='Aucun résultat.'; list.appendChild(p);
+    }
+  }
+  q.addEventListener('input', render);
+  render();
+})();
+</script>

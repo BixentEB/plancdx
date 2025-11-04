@@ -1,0 +1,49 @@
+<div class="card">
+  <h2>Encyclopédie — Gestion & insertion</h2>
+
+  <div class="row" style="gap:8px; margin-bottom:8px">
+    <input id="enc-search" type="search" placeholder="Rechercher (FR/EN, groupe, ex: pecs, squat…)" style="flex:1; background:#151517; color:#eee; border:1px solid #2b2b2e; padding:6px 10px; border-radius:8px" />
+    <select id="enc-filter-cat" class="btn small" style="background:#202022; color:#ccc">
+      <option value="all">Toutes catégories</option>
+      <option value="muscu">Muscu</option>
+      <option value="cardio">Cardio</option>
+      <option value="tibo">TIBO</option>
+      <option value="core">Gainage</option>
+    </select>
+    <select id="enc-target-prog" class="btn small" style="background:#202022; color:#ccc">
+      <option value="B" selected>Programme B (maquette)</option>
+      <option value="A">Programme A (actif)</option>
+    </select>
+    <select id="enc-target-day" class="btn small" style="background:#202022; color:#ccc">
+      <option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option>
+      <option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="7">Dimanche</option>
+    </select>
+    <button id="enc-create-open" class="btn small">➕ Créer un exo</button>
+  </div>
+
+  <!-- Grille des exercices -->
+  <div id="enc-list" class="list"></div>
+</div>
+
+<!-- Création rapide d'exercice -->
+<div class="card" style="margin-top:12px">
+  <h3>Créer / Ajouter un exercice personnalisé</h3>
+  <div class="row" style="gap:8px; margin-top:6px; flex-wrap:wrap">
+    <input id="cx-name" type="text" placeholder="Nom (FR ou EN)" style="flex:2; min-width:220px; background:#151517; color:#eee; border:1px solid #2b2b2e; padding:6px 10px; border-radius:8px" />
+    <select id="cx-type" class="btn small" style="background:#202022; color:#ccc">
+      <option value="muscu" selected>Muscu</option>
+      <option value="cardio">Cardio</option>
+      <option value="tibo">TIBO</option>
+      <option value="core">Gainage</option>
+    </select>
+    <input id="cx-groups" type="text" placeholder="Groupes (ex: pecs, triceps)" style="flex:2; min-width:220px; background:#151517; color:#eee; border:1px solid #2b2b2e; padding:6px 10px; border-radius:8px" />
+    <input id="cx-alias" type="text" placeholder="Alias/EN (optionnel)" style="flex:1; min-width:200px; background:#151517; color:#eee; border:1px solid #2b2b2e; padding:6px 10px; border-radius:8px" />
+    <select id="cx-diff" class="btn small" style="background:#202022; color:#ccc">
+      <option value="1">diffic 1</option><option value="2">diffic 2</option><option value="3">diffic 3</option>
+    </select>
+    <button id="cx-add" class="btn small primary">Ajouter à l’encyclo</button>
+  </div>
+  <p class="hint" style="margin-top:6px">Astuce : un exercice ajouté ici restera dans la base locale (sauvegarde). Tu pourras l’ajouter à A ou B ensuite.</p>
+</div>
+
+<script src="pages/encyclo.js"></script>

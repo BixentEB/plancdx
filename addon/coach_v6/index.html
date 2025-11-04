@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Coach V6 — Programme & Maquette</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <!-- NAV PRINCIPALE -->
+    <header class="topbar">
+      <nav class="nav">
+        <a class="tab" href="#/planA">Programme A</a>
+        <a class="tab" href="#/planB">Programme B (Maquette)</a>
+        <a class="tab" href="#/encyclo">Encyclopédie</a>
+        <a class="tab" href="#/templates">Templates</a>
+        <a class="tab" href="#/lexique">Lexique</a>
+        <a class="tab" href="#/settings">Réglages</a>
+        <a class="tab" href="#/tutoriel">Tutoriel</a>
+      </nav>
+
+      <div class="actions">
+        <button id="btnExport" class="btn">💾 Export</button>
+        <button id="btnImport" class="btn">📥 Import</button>
+        <input id="fileImport" type="file" accept="application/json" style="display:none"/>
+        <button id="btnReset" class="btn warn">♻️ Reset</button>
+      </div>
+    </header>
+
+    <!-- BANDEAU 4 BLOCS (rendue dynamique par app.js selon la page) -->
+    <section id="topband" class="grid4"></section>
+
+    <hr class="sep"/>
+
+    <!-- SOUS-PAGES CHARGÉES PAR router.js -->
+    <main id="subview"></main>
+  </div>
+
+  <!-- SCRIPTS GLOBAUX -->
+  <script src="router.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

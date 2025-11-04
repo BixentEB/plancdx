@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coach — Plan & Suivi</title>
+    <link rel="icon" href="/addon/coach/img/muscle.png" sizes="96x96">
+  <link rel="stylesheet" href="coach.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <div class="title">
+        <div class="logo" aria-hidden="true" title="Entraînement">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M8 12h8" stroke="#0b0f14" stroke-width="2" stroke-linecap="round"/>
+            <rect x="2" y="9" width="4" height="6" rx="1.5" fill="#0b0f14"/>
+            <rect x="18" y="9" width="4" height="6" rx="1.5" fill="#0b0f14"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Plan d'entraînement & Suivi — Vincent</h1>
+          <p class="sub">Construis ta séance en <strong>blocs</strong> (Échauff., Haut, Bas, Core, Étirements) • alternatives instantanées • suivi séries/reps/repos/charge/RPE.</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl">
+          <label for="mode">Type de séance</label>
+          <select id="mode">
+            <option value="full" selected>Full-Body (multi-blocs)</option>
+            <option value="upper">Haut du corps</option>
+            <option value="lower">Bas du corps</option>
+            <option value="core">Core / Abdos</option>
+            <option value="warm">Échauffement seul</option>
+            <option value="stretch">Étirements seuls</option>
+          </select>
+        </div>
+
+        <div class="ctrl">
+          <label for="nbExo">Nb d’exercices (total)</label>
+          <input id="nbExo" type="number" min="3" max="20" value="10" />
+        </div>
+
+        <div class="ctrl">
+          <label for="sets">Séries par exo</label>
+          <input id="sets" type="number" min="1" max="5" value="3" />
+        </div>
+
+        <div class="ctrl">
+          <label for="reps">Répétitions moy.</label>
+          <input id="reps" type="number" min="1" max="20" value="10" />
+        </div>
+
+        <div class="ctrl">
+          <label for="rest">Repos (s)</label>
+          <input id="rest" type="number" min="15" max="240" value="75" />
+        </div>
+
+        <div class="ctrl">
+          <label for="space">Espace</label>
+          <select id="space">
+            <option value="standard" selected>Standard</option>
+            <option value="faible">Faible place</option>
+          </select>
+        </div>
+
+        <div class="ctrl">
+          <label for="equip">Équipement</label>
+          <select id="equip">
+            <option value="all" selected>Tout</option>
+            <option value="poids_corps">Sans matériel</option>
+            <option value="haltères">Haltères</option>
+            <option value="barre">Barre</option>
+            <option value="banc">Banc</option>
+          </select>
+        </div>
+
+        <div class="ctrl">
+          <label for="order">Organisation (par bloc)</label>
+          <select id="order">
+            <option value="balanced" selected>Équilibrée</option>
+            <option value="min_switch">Min. changements de setup</option>
+            <option value="pushpull">Push → Pull → Accessoires</option>
+          </select>
+        </div>
+
+        <div class="ctrl">
+          <label>Blocs inclus</label>
+          <div id="zones" class="zones">
+            <label><input type="checkbox" value="warm" checked> Échauff.</label>
+            <label><input type="checkbox" value="upper" checked> Haut</label>
+            <label><input type="checkbox" value="lower" checked> Bas</label>
+            <label><input type="checkbox" value="core" checked> Core/Abdos</label>
+            <label><input type="checkbox" value="stretch" checked> Étirements</label>
+          </div>
+        </div>
+
+        <div class="ctrl">
+          <label>&nbsp;</label>
+          <label class="toggle"><input id="plateLite" type="checkbox"> Mode débutant / peu de disques</label>
+        </div>
+
+        <div class="ctrl">
+          <label>&nbsp;</label>
+          <label class="toggle"><input id="autoSplit" type="checkbox" checked> Répartition auto des quotas</label>
+        </div>
+
+        <button id="btnBuild" class="btn">Générer</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- Bloc Échauffement -->
+      <section id="sec-warm" class="block block-warm">
+        <header>
+          <h2>Échauffement <small class="quota">
+            <button class="mini" data-q="-warm">–</button>
+            <span id="q-warm">2</span> exos
+            <button class="mini" data-q="+warm">+</button>
+          </small></h2>
+          <div class="meta" id="meta-warm">—</div>
+          <button class="btn ghost" data-reroll="warm">Tirer à nouveau</button>
+        </header>
+        <div id="list-warm" class="list"></div>
+      </section>
+
+      <!-- Bloc Haut -->
+      <section id="sec-upper" class="block block-upper">
+        <header>
+          <h2>Haut du corps <small class="quota">
+            <button class="mini" data-q="-upper">–</button>
+            <span id="q-upper">3</span> exos
+            <button class="mini" data-q="+upper">+</button>
+          </small></h2>
+          <div class="meta" id="meta-upper">—</div>
+          <button class="btn ghost" data-reroll="upper">Tirer à nouveau</button>
+        </header>
+        <div id="list-upper" class="list"></div>
+      </section>
+
+      <!-- Bloc Bas -->
+      <section id="sec-lower" class="block block-lower">
+        <header>
+          <h2>Bas du corps <small class="quota">
+            <button class="mini" data-q="-lower">–</button>
+            <span id="q-lower">3</span> exos
+            <button class="mini" data-q="+lower">+</button>
+          </small></h2>
+          <div class="meta" id="meta-lower">—</div>
+          <button class="btn ghost" data-reroll="lower">Tirer à nouveau</button>
+        </header>
+        <div id="list-lower" class="list"></div>
+      </section>
+
+      <!-- Bloc Core -->
+      <section id="sec-core" class="block block-core">
+        <header>
+          <h2>Core / Abdos <small class="quota">
+            <button class="mini" data-q="-core">–</button>
+            <span id="q-core">2</span> exos
+            <button class="mini" data-q="+core">+</button>
+          </small></h2>
+          <div class="meta" id="meta-core">—</div>
+          <button class="btn ghost" data-reroll="core">Tirer à nouveau</button>
+        </header>
+        <div id="list-core" class="list"></div>
+      </section>
+
+      <!-- Bloc Étirements -->
+      <section id="sec-stretch" class="block block-stretch">
+        <header>
+          <h2>Étirements <small class="quota">
+            <button class="mini" data-q="-stretch">–</button>
+            <span id="q-stretch">2</span> exos
+            <button class="mini" data-q="+stretch">+</button>
+          </small></h2>
+          <div class="meta" id="meta-stretch">—</div>
+          <button class="btn ghost" data-reroll="stretch">Tirer à nouveau</button>
+        </header>
+        <div id="list-stretch" class="list"></div>
+      </section>
+
+      <!-- Récap -->
+      <section class="block">
+        <header>
+          <h2>Récap séance</h2>
+          <div class="meta">Durée totale, volume, RPE moyen. Les saisies restent en local.</div>
+        </header>
+        <div class="summary">
+          <div class="kpis">
+            <div class="kpi"><div class="kpi-v" id="kDur">—</div><div class="kpi-l">Durée estimée</div></div>
+            <div class="kpi"><div class="kpi-v" id="kVol">—</div><div class="kpi-l">Volume total</div></div>
+            <div class="kpi"><div class="kpi-v" id="kRpe">—</div><div class="kpi-l">RPE moyen</div></div>
+          </div>
+          <div class="summary-actions">
+            <button id="btnSave" class="btn">Valider la séance</button>
+            <button id="btnCsv" class="btn ghost">Exporter CSV</button>
+            <button id="btnReset" class="btn danger">Réinitialiser</button>
+          </div>
+          <div id="log" class="log"></div>
+        </div>
+      </section>
+    </main>
+
+    <p class="footer-note">Astuce : coche/décoche des blocs selon le temps dont tu disposes. Répartis le total avec les +/– des en-têtes.</p>
+  </div>
+
+  <script src="coach.js" defer></script>
+</body>
+</html>

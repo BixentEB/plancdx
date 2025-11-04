@@ -1,0 +1,57 @@
+<div class="card">
+  <h2>Programmes (Templates)</h2>
+  <p class="hint">Ici tu crées des <strong>programmes sans jours</strong>, réutilisables. Tu peux importer un jour depuis A/B, ou assembler un template libre puis l’appliquer à A ou B sur les jours de ton choix.</p>
+
+  <div class="row" style="gap:8px; flex-wrap:wrap; margin-top:6px">
+    <input id="tp-name" type="text" placeholder="Nom du template (ex: Full Body PDC, Push/Pull/Core…)" style="flex:2; min-width:240px; background:#151517; color:#eee; border:1px solid #2b2b2e; padding:6px 10px; border-radius:8px">
+    <button id="tp-create" class="btn small primary">Créer</button>
+
+    <select id="tp-import-src" class="btn small" style="background:#202022; color:#ccc">
+      <option value="A" selected>Importer depuis Programme A</option>
+      <option value="B">Importer depuis Programme B</option>
+    </select>
+    <select id="tp-import-day" class="btn small" style="background:#202022; color:#ccc">
+      <option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option>
+      <option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="7">Dimanche</option>
+    </select>
+    <button id="tp-import" class="btn small">Importer le jour → Nouveau template</button>
+  </div>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <h3>Mes templates</h3>
+  <div id="tp-list" class="list"></div>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <h3>Appliquer un template</h3>
+  <div class="row" style="gap:8px; flex-wrap:wrap">
+    <select id="ap-tpl" class="btn small" style="background:#202022; color:#ccc"></select>
+    <select id="ap-prog" class="btn small" style="background:#202022; color:#ccc">
+      <option value="A" selected>Vers Programme A</option>
+      <option value="B">Vers Programme B</option>
+    </select>
+    <select id="ap-mode" class="btn small" style="background:#202022; color:#ccc">
+      <option value="single" selected>Sur un jour</option>
+      <option value="repeat">Répéter sur plusieurs jours</option>
+    </select>
+    <select id="ap-day1" class="btn small" style="background:#202022; color:#ccc">
+      <option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option>
+      <option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="7">Dimanche</option>
+    </select>
+    <label>Jours répétés
+      <select id="ap-days" multiple size="4" style="min-width:140px; background:#151517; color:#ddd; border:1px solid #2b2b2e; border-radius:8px; padding:4px">
+        <option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option>
+        <option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="7">Dimanche</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="row" style="gap:12px; flex-wrap:wrap; margin-top:8px">
+    <label><input type="radio" name="ap-opt" value="free"     checked> Libre</label>
+    <label><input type="radio" name="ap-opt" value="pdc"> PDC only</label>
+    <label><input type="radio" name="ap-opt" value="loads"> Conserver charges</label>
+    <label><input type="radio" name="ap-opt" value="logic"> Combo logique (ordre push/hinge/pull/core/finisher)</label>
+    <button id="ap-apply" class="btn small primary">Appliquer</button>
+  </div>
+</div>

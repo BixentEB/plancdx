@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coach v3.2 — Agenda Pro + Plan</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Coach v3.2 — Journal & Plan</h1>
+    <nav>
+      <button id="toggleLayout" class="btn">Basculer layout exos</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card" id="hebdo">
+      <h2>📅 Rappel Hebdo</h2>
+      <table class="table">
+        <thead><tr><th>Jour</th><th>Type</th><th>Objectif</th></tr></thead>
+        <tbody>
+          <tr><td>Lundi</td><td>Full Body A</td><td>Force & structure</td></tr>
+          <tr><td>Mardi</td><td>Cardio (marche + run)</td><td>Zone 2–3, récup active</td></tr>
+          <tr><td>Mercredi</td><td>Full Body B</td><td>Volume + densité</td></tr>
+          <tr><td>Jeudi</td><td>Cardio</td><td>LISS</td></tr>
+          <tr><td>Vendredi</td><td>Full Body C</td><td>Combo + puissance</td></tr>
+          <tr><td>Samedi</td><td>Cardio (libre)</td><td>Mobilisation / HIIT</td></tr>
+          <tr><td>Dimanche</td><td>OFF</td><td>Repos total 🧘‍♂️</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card" id="agenda">
+      <h2>🗓️ Agenda entraînement (Pro)</h2>
+      <div class="cal-toolbar">
+        <button id="cal-prev" class="btn-sm">◀</button>
+        <div id="cal-title" class="cal-title"></div>
+        <button id="cal-next" class="btn-sm">▶</button>
+      </div>
+      <div id="calendar" class="calendar" aria-label="Calendrier mensuel"></div>
+      <div class="legend">
+        <span class="dot full"></span> Full Body
+        <span class="dot cardio"></span> Cardio
+        <span class="dot off"></span> Off
+        <span class="dot ok"></span> Validé
+      </div>
+    </section>
+
+    <section class="card" id="difficulty">
+      <h2>⚙️ Réglage difficulté</h2>
+      <div class="mode-row">
+        <button class="btn-sm mode-btn active" data-mode="muscu">Muscu</button>
+        <button class="btn-sm mode-btn" data-mode="cardio">Cardio</button>
+        <button class="btn-sm mode-btn" data-mode="tibo">TIBO</button>
+        <label class="inline">Jour
+          <select id="daySelect">
+            <option value="-1">— Ouvert / Aujourd’hui —</option>
+            <option value="1">Lundi</option>
+            <option value="2">Mardi</option>
+            <option value="3">Mercredi</option>
+            <option value="4">Jeudi</option>
+            <option value="5">Vendredi</option>
+            <option value="6">Samedi</option>
+            <option value="0">Dimanche</option>
+          </select>
+        </label>
+      </div>
+      <div class="preset-row">
+        <button data-preset="-1" class="btn-sm">Facile (−1 RPE)</button>
+        <button data-preset="0" class="btn-sm active">Standard</button>
+        <button data-preset="1" class="btn-sm">Durs (+1 RPE)</button>
+        <label class="inline"><input id="add05" type="checkbox"> +0,5 kg</label>
+      </div>
+      <div class="custom-row">
+        <label>Custom RPE: <input id="rpeCustom" type="range" min="-2" max="2" step="1" value="0"></label>
+        <span id="rpeVal" class="badge">0</span>
+      </div>
+      <div class="cycle-row">
+        <label>Début cycle: <input id="cycleStart" type="date"></label>
+        <span id="cycleInfo" class="badge">Semaine 1 • Tempo 2-1-2 • 10–15 reps</span>
+      </div>
+      <div class="toolbar">
+        <button id="applyToday" class="btn">Appliquer</button>
+        <button id="resetToday" class="btn">Réinitialiser</button>
+      </div>
+      <p class="hint">Règle: +1 RPE = +1 rep • ±2 RPE = ±1 série (min 1). Rotation 4 semaines : (S1–4) tempo 2-1-2 / 10–15, (S5–8) tempo 3-1-1 / 8–12 + charge.</p>
+    </section>
+
+    <section class="card" id="plan">
+      <h2>🧩 Plan de la semaine</h2>
+
+      <!-- Lundi -->
+      <article class="day" data-day="1" data-type="full">
+        <header>
+          <button class="chev" aria-expanded="true">▾</button>
+          <h3>🟢 Lundi — Full Body A : Force & Structure</h3>
+        </header>
+        <div class="body">
+          <div class="exo" data-name="Développé couché barre">
+            <div class="line1">
+              <span class="name">Développé couché barre</span>
+              <span class="goal">Pecs/Triceps</span>
+              <button class="note-btn" title="Ajouter une note">✎</button>
+            </div>
+            <div class="line2 params">
+              <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+              <label>Reps <input class="num xs" data-k="reps" type="number" value="10"></label>
+              <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-1"></label>
+              <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7.5"></label>
+              <label>Charge <input class="num sm" data-k="load" type="text" value="10–20"></label>
+            </div>
+            <div class="note hidden"><textarea placeholder="Notes…"></textarea></div>
+          </div>
+
+          <div class="exo" data-name="Goblet Squat">
+            <div class="line1">
+              <span class="name">Goblet Squat</span>
+              <span class="goal">Jambes/Fessiers/Abdos</span>
+              <button class="note-btn" title="Ajouter une note">✎</button>
+            </div>
+            <div class="line2 params">
+              <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+              <label>Reps <input class="num xs" data-k="reps" type="number" value="15"></label>
+              <label>Tempo <input class="num xs" data-k="tempo" type="text" value="3-1-1"></label>
+              <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+              <label>Charge <input class="num sm" data-k="load" type="text" value="5"></label>
+            </div>
+            <div class="note hidden"><textarea placeholder="Notes…"></textarea></div>
+          </div>
+
+          <div class="post-training">
+            <strong>Post-training</strong> — Vélo / marche rapide 5–8 min (Z2).
+          </div>
+        </div>
+      </article>
+
+      <!-- Mardi -->
+      <article class="day" data-day="2" data-type="cardio">
+        <header>
+          <button class="chev" aria-expanded="false">▸</button>
+          <h3>🔵 Mardi — Cardio : Marche + Run (Z2–3)</h3>
+        </header>
+        <div class="body hidden">
+          <div class="exo cardio">
+            <div class="line1">
+              <span class="name">Séance fractionnée douce</span>
+              <span class="goal">Volume aérobie</span>
+            </div>
+            <div class="line2 params cardio-controls">
+              <label>Total <input class="num xs" data-k="total" type="number" value="35"></label>
+              <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+              <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+              <label>Bloc <input class="num lg" data-k="bloc" type="text" value="Marche 4’ + Run 1’ × 5"></label>
+            </div>
+          </div>
+          <div class="exo cardio tibo">
+            <div class="line1">
+              <span class="name">TIBO Extrm</span>
+              <span class="goal">Brûle graisse (HIIT guidé)</span>
+            </div>
+            <div class="line2 params cardio-controls">
+              <label>Total <input class="num xs" data-k="total" type="number" value="30"></label>
+              <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+              <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+              <label>Bloc <input class="num lg" data-k="bloc" type="text" value="Routine vidéo"></label>
+            </div>
+          </div>
+          <div class="post-training"><strong>Post-training</strong> — Étirements 5 min + respiration nasale 2 min.</div>
+        </div>
+      </article>
+
+      <!-- Mercredi -->
+      <article class="day" data-day="3" data-type="full">
+        <header>
+          <button class="chev" aria-expanded="false">▸</button>
+          <h3>🟢 Mercredi — Full Body B : Volume & Brûlage</h3>
+        </header>
+        <div class="body hidden">
+          <div class="exo" data-name="Développé haltères au sol">
+            <div class="line1">
+              <span class="name">Développé haltères au sol</span>
+              <span class="goal">Pectoraux</span>
+              <button class="note-btn" title="Ajouter une note">✎</button>
+            </div>
+            <div class="line2 params">
+              <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+              <label>Reps <input class="num xs" data-k="reps" type="number" value="12"></label>
+              <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-2"></label>
+              <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+              <label>Charge <input class="num sm" data-k="load" type="text" value="3/haltère"></label>
+            </div>
+            <div class="note hidden"><textarea placeholder="Notes…"></textarea></div>
+          </div>
+          <div class="post-training"><strong>Post-training</strong> — Vélo / marche rapide 5–8 min (Z2).</div>
+        </div>
+      </article>
+
+      <!-- Jeudi -->
+      <article class="day" data-day="4" data-type="cardio">
+        <header>
+          <button class="chev" aria-expanded="false">▸</button>
+          <h3>🔵 Jeudi — Cardio LISS (marche/tapis)</h3>
+        </header>
+        <div class="body hidden">
+          <div class="exo cardio">
+            <div class="line1"><span class="name">Marche rapide tapis</span><span class="goal">LISS</span></div>
+            <div class="line2 params cardio-controls">
+              <label>Total <input class="num xs" data-k="total" type="number" value="40"></label>
+              <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+              <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+              <label>Bloc <input class="num lg" data-k="bloc" type="text" value="Marche continue"></label>
+            </div>
+          </div>
+          <div class="exo cardio tibo">
+            <div class="line1"><span class="name">TIBO Extrm</span><span class="goal">Brûle graisse (HIIT guidé)</span></div>
+            <div class="line2 params cardio-controls">
+              <label>Total <input class="num xs" data-k="total" type="number" value="30"></label>
+              <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+              <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+              <label>Bloc <input class="num lg" data-k="bloc" type="text" value="Routine vidéo"></label>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Vendredi -->
+      <article class="day" data-day="5" data-type="full">
+        <header>
+          <button class="chev" aria-expanded="false">▸</button>
+          <h3>🔴 Vendredi — Full Body C : Puissance & Combo</h3>
+        </header>
+        <div class="body hidden">
+          <div class="exo" data-name="Développé militaire assis">
+            <div class="line1">
+              <span class="name">Développé militaire assis</span>
+              <span class="goal">Épaules/Triceps</span>
+              <button class="note-btn" title="Ajouter une note">✎</button>
+            </div>
+            <div class="line2 params">
+              <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+              <label>Reps <input class="num xs" data-k="reps" type="number" value="10"></label>
+              <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-1"></label>
+              <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+              <label>Charge <input class="num sm" data-k="load" type="text" value="3–5"></label>
+            </div>
+            <div class="note hidden"><textarea placeholder="Notes…"></textarea></div>
+          </div>
+          <div class="post-training"><strong>Post-training</strong> — Vélo / marche rapide 5–8 min (Z2).</div>
+        </div>
+      </article>
+
+      <!-- Samedi -->
+      <article class="day" data-day="6" data-type="cardio">
+        <header>
+          <button class="chev" aria-expanded="false">▸</button>
+          <h3>🔵 Samedi — Cardio libre / HIIT léger</h3>
+        </header>
+        <div class="body hidden">
+          <div class="exo cardio">
+            <div class="line1"><span class="name">Cycling/Tapis fractionné</span><span class="goal">Aérobie + Pic</span></div>
+            <div class="line2 params cardio-controls">
+              <label>Total <input class="num xs" data-k="total" type="number" value="30"></label>
+              <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+              <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+              <label>Bloc <input class="num lg" data-k="bloc" type="text" value="3× (5’ modéré + 1’ rapide)"></label>
+            </div>
+          </div>
+          <div class="exo cardio tibo">
+            <div class="line1"><span class="name">TIBO Extrm</span><span class="goal">Brûle graisse (HIIT guidé)</span></div>
+            <div class="line2 params cardio-controls">
+              <label>Total <input class="num xs" data-k="total" type="number" value="30"></label>
+              <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+              <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+              <label>Bloc <input class="num lg" data-k="bloc" type="text" value="Routine vidéo"></label>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Dimanche -->
+      <article class="day" data-day="0" data-type="off">
+        <header>
+          <button class="chev" aria-expanded="false">▸</button>
+          <h3>☕ Dimanche — OFF / Récup</h3>
+        </header>
+        <div class="body hidden">
+          <p>Sommeil, mobilité douce, hydratation. Respiration nasale 5 min.</p>
+        </div>
+      </article>
+
+    </section>
+  </main>
+
+  <footer class="foot">
+    <small>v3.2 prototype — HTML/CSS/JS séparés · localStorage.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,679 @@
+[
+  {
+    "id": "jj",
+    "name": "Jumping jacks",
+    "cat": "warm",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 2,
+    "reps": "30s",
+    "rest": 30,
+    "timePerRep": 1,
+    "tips": "Impact léger, genoux souples.",
+    "alt": []
+  },
+  {
+    "id": "rope",
+    "name": "Corde à sauter (ou simulée)",
+    "cat": "warm",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 2,
+    "reps": "45s",
+    "rest": 30,
+    "timePerRep": 1,
+    "tips": "Poignets détendus, petits sauts.",
+    "alt": [
+      "jj"
+    ]
+  },
+  {
+    "id": "hip_mob",
+    "name": "Mobilité hanches (cercles + ouverture)",
+    "cat": "warm",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 1,
+    "reps": "1-2min",
+    "rest": 0,
+    "timePerRep": 1,
+    "tips": "Amplitude progressive.",
+    "alt": []
+  },
+  {
+    "id": "shoulder_mob",
+    "name": "Mobilité épaules (dislocations bâton/serviette)",
+    "cat": "warm",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 1,
+    "reps": "1-2min",
+    "rest": 0,
+    "timePerRep": 1,
+    "tips": "Pas de douleur, reste fluide.",
+    "alt": []
+  },
+  {
+    "id": "squat_bw",
+    "name": "Squats poids du corps (pré-activation)",
+    "cat": "warm",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 2,
+    "reps": "15",
+    "rest": 30,
+    "timePerRep": 2,
+    "tips": "Genoux suivent la pointe.",
+    "alt": []
+  },
+  {
+    "id": "pushup_knee",
+    "name": "Pompes sur genoux (pré-activation)",
+    "cat": "warm",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 2,
+    "reps": "12",
+    "rest": 30,
+    "timePerRep": 2,
+    "tips": "Gainage neutre.",
+    "alt": [
+      "jj"
+    ]
+  },
+  {
+    "id": "chest_st",
+    "name": "Étirement pectoraux au mur",
+    "cat": "stretch",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 1,
+    "reps": "20-30s",
+    "rest": 0,
+    "timePerRep": 1,
+    "tips": "Ouvre doucement la poitrine.",
+    "alt": []
+  },
+  {
+    "id": "lat_st",
+    "name": "Étirement dorsaux (au montant/porte)",
+    "cat": "stretch",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 1,
+    "reps": "20-30s",
+    "rest": 0,
+    "timePerRep": 1,
+    "tips": "Reste en respiration lente.",
+    "alt": []
+  },
+  {
+    "id": "hipflex_st",
+    "name": "Étirement fléchisseurs de hanches",
+    "cat": "stretch",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 1,
+    "reps": "20-30s/jamb",
+    "rest": 0,
+    "timePerRep": 1,
+    "tips": "Bassin rétroversé.",
+    "alt": []
+  },
+  {
+    "id": "hams_st",
+    "name": "Ischios — assis",
+    "cat": "stretch",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 1,
+    "reps": "20-30s",
+    "rest": 0,
+    "timePerRep": 1,
+    "tips": "Dos long, penche depuis les hanches.",
+    "alt": []
+  },
+  {
+    "id": "quad_st",
+    "name": "Quadriceps — debout",
+    "cat": "stretch",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 1,
+    "reps": "20-30s/jamb",
+    "rest": 0,
+    "timePerRep": 1,
+    "tips": "Genou aligné sous la hanche.",
+    "alt": []
+  },
+  {
+    "id": "plank",
+    "name": "Gainage planche",
+    "cat": "core",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "30-45s",
+    "rest": 45,
+    "timePerRep": 1,
+    "tips": "Coudes sous épaules, bassin neutre.",
+    "alt": [
+      "plank_knee"
+    ]
+  },
+  {
+    "id": "plank_knee",
+    "name": "Planche sur genoux",
+    "cat": "core",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "30s",
+    "rest": 45,
+    "timePerRep": 1,
+    "tips": "Même alignement que la planche.",
+    "alt": []
+  },
+  {
+    "id": "deadbug",
+    "name": "Dead bug",
+    "cat": "core",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "10/side",
+    "rest": 45,
+    "timePerRep": 2,
+    "tips": "Lombaires au sol.",
+    "alt": [
+      "plank"
+    ]
+  },
+  {
+    "id": "bird_dog",
+    "name": "Bird-dog",
+    "cat": "core",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "10/side",
+    "rest": 45,
+    "timePerRep": 2,
+    "tips": "Hanches stables.",
+    "alt": [
+      "deadbug"
+    ]
+  },
+  {
+    "id": "hollow",
+    "name": "Hollow hold (banane)",
+    "cat": "core",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "20-30s",
+    "rest": 45,
+    "timePerRep": 1,
+    "tips": "Respire dans les côtes.",
+    "alt": [
+      "plank"
+    ]
+  },
+  {
+    "id": "crunch",
+    "name": "Crunch contrôlé",
+    "cat": "core",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "12-15",
+    "rest": 45,
+    "timePerRep": 2,
+    "tips": "Menton éloigné de la poitrine.",
+    "alt": [
+      "hollow"
+    ]
+  },
+  {
+    "id": "bench",
+    "name": "Développé couché — barre",
+    "cat": "upper",
+    "equip": "barre",
+    "space": "standard",
+    "station": "barre+banc+disques",
+    "sets": 3,
+    "reps": "8-12",
+    "rest": 75,
+    "timePerRep": 3,
+    "tips": "Omoplates serrées.",
+    "alt": [
+      "pushup",
+      "db_press",
+      "dip_chair"
+    ]
+  },
+  {
+    "id": "db_press",
+    "name": "Développé haltères — banc",
+    "cat": "upper",
+    "equip": "haltères",
+    "space": "standard",
+    "station": "haltères+banc",
+    "sets": 3,
+    "reps": "8-12",
+    "rest": 75,
+    "timePerRep": 3,
+    "tips": "Poignets neutres.",
+    "alt": [
+      "pushup",
+      "bench"
+    ]
+  },
+  {
+    "id": "pushup",
+    "name": "Pompes au sol",
+    "cat": "upper",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "10-15",
+    "rest": 60,
+    "timePerRep": 2,
+    "tips": "Gainage solide.",
+    "alt": [
+      "pushup_knee"
+    ]
+  },
+  {
+    "id": "fly",
+    "name": "Écartés haltères — banc",
+    "cat": "upper",
+    "equip": "haltères",
+    "space": "standard",
+    "station": "haltères+banc",
+    "sets": 3,
+    "reps": "10-12",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Coudes souples.",
+    "alt": [
+      "pushup_wide"
+    ]
+  },
+  {
+    "id": "row",
+    "name": "Rowing barre penché",
+    "cat": "upper",
+    "equip": "barre",
+    "space": "standard",
+    "station": "barre+disques (debout)",
+    "sets": 3,
+    "reps": "10-12",
+    "rest": 75,
+    "timePerRep": 3,
+    "tips": "Buste ~45°.",
+    "alt": [
+      "db_row",
+      "inverted_row"
+    ]
+  },
+  {
+    "id": "db_row",
+    "name": "Rowing unilatéral — haltère",
+    "cat": "upper",
+    "equip": "haltères",
+    "space": "standard",
+    "station": "haltères+banc",
+    "sets": 3,
+    "reps": "10-12/jamb",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Tire vers la hanche.",
+    "alt": [
+      "row",
+      "inverted_row"
+    ]
+  },
+  {
+    "id": "inverted_row",
+    "name": "Tirage inversé (sous table)",
+    "cat": "upper",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "8-12",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Corps gainé.",
+    "alt": [
+      "db_row"
+    ]
+  },
+  {
+    "id": "ohp",
+    "name": "Développé militaire — assis",
+    "cat": "upper",
+    "equip": "haltères",
+    "space": "standard",
+    "station": "haltères+banc",
+    "sets": 3,
+    "reps": "8-12",
+    "rest": 75,
+    "timePerRep": 3,
+    "tips": "Tronc gainé.",
+    "alt": [
+      "pike_pushup"
+    ]
+  },
+  {
+    "id": "curl",
+    "name": "Curl biceps (haltères)",
+    "cat": "upper",
+    "equip": "haltères",
+    "space": "faible",
+    "station": "haltères (debout)",
+    "sets": 3,
+    "reps": "10-12",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Pas d’élan.",
+    "alt": [
+      "hammer"
+    ]
+  },
+  {
+    "id": "hammer",
+    "name": "Curl marteau",
+    "cat": "upper",
+    "equip": "haltères",
+    "space": "faible",
+    "station": "haltères (debout)",
+    "sets": 3,
+    "reps": "10-12",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Poignets neutres.",
+    "alt": [
+      "curl"
+    ]
+  },
+  {
+    "id": "skull",
+    "name": "Triceps : barre front",
+    "cat": "upper",
+    "equip": "barre",
+    "space": "standard",
+    "station": "barre+banc+disques",
+    "sets": 3,
+    "reps": "10-12",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Coudes fixes.",
+    "alt": [
+      "bench_dip",
+      "oh_triceps"
+    ]
+  },
+  {
+    "id": "squat",
+    "name": "Squat (barre ou poids du corps)",
+    "cat": "lower",
+    "equip": "barre",
+    "space": "standard",
+    "station": "barre+disques (debout)",
+    "sets": 3,
+    "reps": "10-15",
+    "rest": 75,
+    "timePerRep": 3,
+    "tips": "Pieds ancrés.",
+    "alt": [
+      "goblet",
+      "chair_squat"
+    ]
+  },
+  {
+    "id": "goblet",
+    "name": "Goblet squat — haltère",
+    "cat": "lower",
+    "equip": "haltères",
+    "space": "faible",
+    "station": "haltères (debout)",
+    "sets": 3,
+    "reps": "12-15",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Coudes sous l’haltère.",
+    "alt": [
+      "chair_squat"
+    ]
+  },
+  {
+    "id": "chair_squat",
+    "name": "Squat à la chaise",
+    "cat": "lower",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "12-15",
+    "rest": 45,
+    "timePerRep": 2,
+    "tips": "Contrôle la descente.",
+    "alt": [
+      "goblet"
+    ]
+  },
+  {
+    "id": "lunge",
+    "name": "Fentes avant — haltères",
+    "cat": "lower",
+    "equip": "haltères",
+    "space": "standard",
+    "station": "haltères (debout)",
+    "sets": 3,
+    "reps": "10/jamb",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Grand pas, talon avant.",
+    "alt": [
+      "rev_lunge",
+      "step_up"
+    ]
+  },
+  {
+    "id": "rev_lunge",
+    "name": "Fentes arrière — poids du corps",
+    "cat": "lower",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "10/jamb",
+    "rest": 45,
+    "timePerRep": 2,
+    "tips": "Buste vertical.",
+    "alt": [
+      "lunge"
+    ]
+  },
+  {
+    "id": "step_up",
+    "name": "Montées sur marche",
+    "cat": "lower",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "12/jamb",
+    "rest": 45,
+    "timePerRep": 2,
+    "tips": "Pousse dans le talon.",
+    "alt": [
+      "lunge"
+    ]
+  },
+  {
+    "id": "legext",
+    "name": "Extension jambes — levier du banc",
+    "cat": "lower",
+    "equip": "banc",
+    "space": "standard",
+    "station": "banc (levier)",
+    "sets": 3,
+    "reps": "12-15",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Pause en haut.",
+    "alt": [
+      "sissy",
+      "wall_sit"
+    ]
+  },
+  {
+    "id": "sissy",
+    "name": "Sissy squat tenu",
+    "cat": "lower",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "10",
+    "rest": 45,
+    "timePerRep": 2,
+    "tips": "Appui solide.",
+    "alt": [
+      "wall_sit"
+    ]
+  },
+  {
+    "id": "wall_sit",
+    "name": "Chaise au mur (isométrique)",
+    "cat": "lower",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "30-60s",
+    "rest": 45,
+    "timePerRep": 1,
+    "tips": "Cuisses parallèles.",
+    "alt": [
+      "sissy"
+    ]
+  },
+  {
+    "id": "rdl",
+    "name": "Soulevé de terre jambes tendues",
+    "cat": "lower",
+    "equip": "barre",
+    "space": "standard",
+    "station": "barre+disques (debout)",
+    "sets": 3,
+    "reps": "12",
+    "rest": 75,
+    "timePerRep": 3,
+    "tips": "Charnière de hanches.",
+    "alt": [
+      "db_rdl",
+      "hip_hinge"
+    ]
+  },
+  {
+    "id": "db_rdl",
+    "name": "RDL haltères",
+    "cat": "lower",
+    "equip": "haltères",
+    "space": "faible",
+    "station": "haltères (debout)",
+    "sets": 3,
+    "reps": "12",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Dos plat.",
+    "alt": [
+      "hip_hinge"
+    ]
+  },
+  {
+    "id": "hip_hinge",
+    "name": "Hip hinge au bâton/guide",
+    "cat": "lower",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "12",
+    "rest": 45,
+    "timePerRep": 2,
+    "tips": "Bâton en 3 points.",
+    "alt": []
+  },
+  {
+    "id": "hip",
+    "name": "Hip Thrust / Pont fessier — barre",
+    "cat": "lower",
+    "equip": "barre",
+    "space": "standard",
+    "station": "barre+banc+disques",
+    "sets": 3,
+    "reps": "12",
+    "rest": 60,
+    "timePerRep": 3,
+    "tips": "Alignement en haut.",
+    "alt": [
+      "glute_bridge",
+      "single_glute"
+    ]
+  },
+  {
+    "id": "glute_bridge",
+    "name": "Pont fessier au sol",
+    "cat": "lower",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "15",
+    "rest": 45,
+    "timePerRep": 2,
+    "tips": "Serre en haut.",
+    "alt": [
+      "single_glute"
+    ]
+  },
+  {
+    "id": "single_glute",
+    "name": "Pont fessier une jambe",
+    "cat": "lower",
+    "equip": "poids_corps",
+    "space": "faible",
+    "station": "poids du corps (tapis)",
+    "sets": 3,
+    "reps": "10/jamb",
+    "rest": 45,
+    "timePerRep": 2,
+    "tips": "Hanches à niveau.",
+    "alt": [
+      "glute_bridge"
+    ]
+  }
+]

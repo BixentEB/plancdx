@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coach v4 — Agenda + Plan (Adaptatif)</title>
+  <link rel="icon" href="/addon/coach/img/muscle.png" sizes="96x96">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- Bandeau / Topbar -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <h1>Coach v4 — Journal & Plan</h1>
+      <p class="tagline">Agenda, réglages adaptatifs & suivi sauvegardé</p>
+    </div>
+    <nav class="actions">
+      <button id="toggleLayout" class="btn">Basculer layout exos</button>
+      <button id="btnExport" class="btn">Exporter</button>
+      <button id="btnImport" class="btn">Importer</button>
+      <button id="btnReset"  class="btn danger">Réinitialiser</button>
+      <input id="fileImport" type="file" accept="application/json" hidden />
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <!-- Rappel hebdo -->
+  <section class="card" id="hebdo">
+    <h2>📅 Rappel Hebdo</h2>
+    <table class="table">
+      <thead><tr><th>Jour</th><th>Type</th><th>Objectif</th></tr></thead>
+      <tbody>
+        <tr><td>Lundi</td><td>Full Body A</td><td>Force & structure</td></tr>
+        <tr><td>Mardi</td><td>Cardio (marche + run)</td><td>Zone 2–3 récupération active</td></tr>
+        <tr><td>Mercredi</td><td>Full Body B</td><td>Volume + densité</td></tr>
+        <tr><td>Jeudi</td><td>Cardio</td><td>Déstockage adipeux, récupération</td></tr>
+        <tr><td>Vendredi</td><td>Full Body C</td><td>Combo + puissance</td></tr>
+        <tr><td>Samedi</td><td>Cardio (libre)</td><td>Mobilisation / HIIT</td></tr>
+        <tr><td>Dimanche</td><td>OFF</td><td>Repos total 🧘‍♂️</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Agenda pro -->
+  <section class="card" id="agenda">
+    <h2>🗓️ Agenda entraînement (Pro)</h2>
+    <div class="cal-toolbar">
+      <button id="cal-prev" class="btn-sm">◀</button>
+      <div id="cal-title" class="cal-title"></div>
+      <button id="cal-next" class="btn-sm">▶</button>
+    </div>
+    <div id="calendar" class="calendar" aria-label="Calendrier mensuel"></div>
+    <div class="legend">
+      <span class="dot full"></span> Full Body
+      <span class="dot cardio"></span> Cardio
+      <span class="dot off"></span> Off
+      <span class="dot ok"></span> Validé
+    </div>
+
+    <!-- Stats hebdo -->
+    <div class="stats-note" id="weekStats">
+      <span>✅ Full Body validées : <strong id="statFull">0</strong></span>
+      <span>🏃 Cardio validées : <strong id="statCardio">0</strong></span>
+      <span>⏱️ Total semaine : <strong id="statHours">0h00</strong></span>
+    </div>
+  </section>
+
+    <!-- Extras / Marches -->
+  <section class="card" id="extras">
+    <h2>🚶‍♂️ Marches & Extras (hebdo)</h2>
+
+    <div class="row">
+      <label>Jour
+        <select id="extraDay">
+          <option value="today">Aujourd’hui</option>
+          <option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option>
+          <option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="0">Dimanche</option>
+        </select>
+      </label>
+      <label>Durée (min)
+        <input id="extraMin" type="number" class="num xs" value="30" min="5" step="5">
+      </label>
+      <label>Quantité
+        <input id="extraQty" type="number" class="num xs" value="1" min="1" step="1">
+      </label>
+      <button id="addExtra" class="btn primary">➕ Ajouter</button>
+      <button id="quick3x30" class="btn">✨ 3×30 min (aujourd’hui)</button>
+    </div>
+
+    <div class="hint">Astuce : 3×30 min/jour ≈ 10 000 pas.</div>
+
+    <div id="extraList" class="extra-list"></div>
+  </section>
+
+
+  <!-- Réglage adaptatif v4 -->
+  <section class="card" id="adapt">
+    <h2>🧠 Réglage adaptatif (v4)</h2>
+    <div class="tabs">
+      <button class="tab active" data-tab="muscu">Muscu</button>
+      <button class="tab" data-tab="cardio">Cardio</button>
+      <button class="tab" data-tab="tibo">TIBO</button>
+      <button class="tab" data-tab="gainage">Gainage</button>
+      <label class="inline">Jour
+        <select id="daySelect">
+          <option value="-1">— Ouvert / Aujourd’hui —</option>
+          <option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option>
+          <option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="0">Dimanche</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Muscu -->
+    <div class="panel" id="panel-muscu">
+      <div class="row">
+        <label>RPE cible <input id="rpeMuscu" type="range" min="-2" max="2" step="1" value="0"></label>
+        <span id="rpeMuscuVal" class="badge">0</span>
+        <label class="inline"><input id="add05" type="checkbox"> +0,5 kg (si charge)</label>
+        <label class="inline">Repos
+          <select id="restMuscu"><option>60s</option><option>75s</option><option>90s</option><option>120s</option></select>
+        </label>
+      </div>
+      <div class="row">
+        <button id="simMuscu" class="btn">🧪 Simuler</button>
+        <button id="applyMuscu" class="btn primary">✅ Appliquer</button>
+      </div>
+      <p class="hint">RPE +1 ⇒ +1 rep (jusqu’à 15), au-delà ⇒ +1 série et retour 8–10 reps.</p>
+      <div id="simMuscuOut" class="simout"></div>
+    </div>
+
+    <!-- Cardio -->
+    <div class="panel hidden" id="panel-cardio">
+      <div class="row">
+        <label>RPE cible <input id="rpeCardio" type="range" min="-2" max="2" step="1" value="0"></label>
+        <span id="rpeCardioVal" class="badge">0</span>
+      </div>
+      <div class="row">
+        <button id="simCardio" class="btn">🧪 Simuler</button>
+        <button id="applyCardio" class="btn primary">✅ Appliquer</button>
+      </div>
+      <p class="hint">RPE ±1 ⇒ ±5 min total. Ratio auto WU 10% / Bloc 80% / CD 10%.</p>
+      <div id="simCardioOut" class="simout"></div>
+    </div>
+
+    <!-- TIBO -->
+    <div class="panel hidden" id="panel-tibo">
+      <div class="row">
+        <label>RPE cible <input id="rpeTibo" type="range" min="-2" max="2" step="1" value="0"></label>
+        <span id="rpeTiboVal" class="badge">0</span>
+      </div>
+      <div class="row">
+        <button id="simTibo" class="btn">🧪 Simuler</button>
+        <button id="applyTibo" class="btn primary">➕ Ajouter TIBO</button>
+      </div>
+      <p class="hint">Base 30 min = 5 cycles (3’/3’). RPE +1 ⇒ +1 cycle. <strong>Uniquement</strong> jours Cardio.</p>
+      <div id="simTiboOut" class="simout"></div>
+    </div>
+
+    <!-- Gainage -->
+    <div class="panel hidden" id="panel-gainage">
+      <div class="row">
+        <label>RPE cible <input id="rpeCore" type="range" min="-2" max="2" step="1" value="0"></label>
+        <span id="rpeCoreVal" class="badge">0</span>
+      </div>
+      <div class="row">
+        <button id="simCore" class="btn">🧪 Simuler</button>
+        <button id="applyCore" class="btn primary">✅ Appliquer</button>
+      </div>
+      <p class="hint">Base 3×30s. RPE +1 ⇒ +5s/série. &gt;45s ⇒ +1 série & retour 30s.</p>
+      <div id="simCoreOut" class="simout"></div>
+    </div>
+  </section>
+
+  <!-- Plan de la semaine (tous les jours/exos) -->
+  <section class="card" id="plan">
+    <h2>🧩 Plan de la semaine</h2>
+
+    <!-- LUNDI -->
+    <article class="day" data-day="1" data-type="full">
+      <header><button class="chev" aria-expanded="true">▾</button><h3>🟢 Lundi — Full Body A : Force & Structure</h3></header>
+      <div class="body">
+        <div class="exo" data-name="Développé couché barre">
+          <div class="line1"><span class="name">Développé couché barre</span><span class="goal">Pecs/Triceps</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="10"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7.5"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="10–20kg"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Goblet Squat">
+          <div class="line1"><span class="name">Goblet Squat</span><span class="goal">Jambes/Fessiers/Abdos</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="15"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="3-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="5kg"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Rowing barre penché">
+          <div class="line1"><span class="name">Rowing barre penché</span><span class="goal">Dos/Biceps</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="12"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-2"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="15–20kg"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Soulevé de terre jambes tendues">
+          <div class="line1"><span class="name">Soulevé de terre jambes tendues</span><span class="goal">Ischios/Fessiers/Lombaires</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="12"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="3-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="15–20kg"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Pompes sur genoux">
+          <div class="line1"><span class="name">Pompes sur genoux</span><span class="goal">Triceps/Core</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="15"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="6.5"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="PDC"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Crunch au sol">
+          <div class="line1"><span class="name">Crunch au sol</span><span class="goal">Abdos</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="20"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-2"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="6"></label>
+          </div>
+        </div>
+        <div class="exo core" data-name="Planche">
+          <div class="line1"><span class="name">Planche</span><span class="goal">Core stable</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Temps (s) <input class="num xs" data-k="sec" type="number" value="40"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="statique"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="6"></label>
+          </div>
+        </div>
+        <div class="post-training"><strong>Finisher optionnel</strong> — 5–8 min vélo Z2.</div>
+      </div>
+    </article>
+
+    <!-- MARDI -->
+    <article class="day" data-day="2" data-type="cardio">
+      <header><button class="chev" aria-expanded="false">▸</button><h3>🔵 Mardi — Cardio : Marche + Run (Z2–3)</h3></header>
+      <div class="body hidden">
+        <div class="exo cardio" data-name="Séance fractionnée douce">
+          <div class="line1"><span class="name">Séance fractionnée douce</span><span class="goal">Volume aérobie</span></div>
+          <div class="line2 params">
+            <label>Total <input class="num xs" data-k="total" type="number" value="35"></label>
+            <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+            <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+            <label>Bloc <input class="num lg" data-k="bloc" type="text" value="Marche 4’ + Run 1’ × 5"></label>
+          </div>
+        </div>
+        <div class="exo cardio tibo">
+          <div class="line1"><span class="name">TIBO Extrm</span><span class="goal">Brûle graisse (HIIT guidé)</span></div>
+          <div class="line2 params">
+            <label>Total <input class="num xs" data-k="total" type="number" value="30"></label>
+            <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+            <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+            <label>Bloc <input class="num lg" data-k="bloc" type="text" value="Routine vidéo"></label>
+          </div>
+        </div>
+        <div class="post-training"><strong>Récup</strong> — Étirements 5 min + respiration nasale 2 min.</div>
+      </div>
+    </article>
+
+    <!-- MERCREDI -->
+    <article class="day" data-day="3" data-type="full">
+      <header><button class="chev" aria-expanded="false">▸</button><h3>🟢 Mercredi — Full Body B : Volume & Brûlage</h3></header>
+      <div class="body hidden">
+        <div class="exo" data-name="Développé haltères au sol">
+          <div class="line1"><span class="name">Développé haltères au sol</span><span class="goal">Pectoraux</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="12"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-2"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="3kg/haltère"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Squat PDC dynamique">
+          <div class="line1"><span class="name">Squat PDC dynamique</span><span class="goal">Cardio + Quads</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="20"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Rowing haltère 1 bras">
+          <div class="line1"><span class="name">Rowing haltère 1 bras</span><span class="goal">Contrôle + équilibre</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="15"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-2"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="3–5kg"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Hip Thrust sur banc">
+          <div class="line1"><span class="name">Hip Thrust sur banc</span><span class="goal">Fessiers 🔥</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="15"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="PDC ou charge"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Élévations latérales">
+          <div class="line1"><span class="name">Élévations latérales</span><span class="goal">Épaules latérales</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="20"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="6"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="3kg"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Crunch jambes levées">
+          <div class="line1"><span class="name">Crunch jambes levées</span><span class="goal">Abdos + protection lombaire</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="20"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-2"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="6"></label>
+          </div>
+        </div>
+        <div class="exo core" data-name="Gainage genoux relevés">
+          <div class="line1"><span class="name">Gainage genoux relevés</span><span class="goal">Core + transverse</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Temps (s) <input class="num xs" data-k="sec" type="number" value="40"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="statique"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="6"></label>
+          </div>
+        </div>
+        <div class="post-training"><strong>Finisher optionnel</strong> — 10 min marche rapide sur tapis.</div>
+      </div>
+    </article>
+
+    <!-- JEUDI -->
+    <article class="day" data-day="4" data-type="cardio">
+      <header><button class="chev" aria-expanded="false">▸</button><h3>🔵 Jeudi — Cardio LISS</h3></header>
+      <div class="body hidden">
+        <div class="exo cardio" data-name="Marche rapide tapis">
+          <div class="line1"><span class="name">Marche rapide tapis</span><span class="goal">LISS</span></div>
+          <div class="line2 params">
+            <label>Total <input class="num xs" data-k="total" type="number" value="40"></label>
+            <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+            <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+            <label>Bloc <input class="num lg" data-k="bloc" type="text" value="Marche continue"></label>
+          </div>
+        </div>
+        <div class="exo cardio tibo">
+          <div class="line1"><span class="name">TIBO Extrm</span><span class="goal">Brûle graisse (HIIT guidé)</span></div>
+          <div class="line2 params">
+            <label>Total <input class="num xs" data-k="total" type="number" value="30"></label>
+            <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+            <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+            <label>Bloc <input class="num lg" data-k="bloc" type="text" value="Routine vidéo"></label>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- VENDREDI -->
+    <article class="day" data-day="5" data-type="full">
+      <header><button class="chev" aria-expanded="false">▸</button><h3>🔴 Vendredi — Full Body C : Puissance & Combo</h3></header>
+      <div class="body hidden">
+        <div class="exo" data-name="Développé militaire assis">
+          <div class="line1"><span class="name">Développé militaire assis</span><span class="goal">Épaules/Triceps</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="10"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="3–5kg"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Front Squat avec barre">
+          <div class="line1"><span class="name">Front Squat avec barre</span><span class="goal">Cuisses + gainage</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="4"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="12"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="3-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7.5"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="10–20kg"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Tirage menton (barre)">
+          <div class="line1"><span class="name">Tirage menton (barre)</span><span class="goal">Trapèzes/Biceps</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="12"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-2"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="10–15kg"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Fentes arrière">
+          <div class="line1"><span class="name">Fentes arrière</span><span class="goal">Fessiers + Cuisses</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="10"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="7"></label>
+            <label>Charge <input class="num sm" data-k="load" type="text" value="PDC/haltères"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Pompes inclinées (mur/banc)">
+          <div class="line1"><span class="name">Pompes inclinées (mur/banc)</span><span class="goal">Triceps + Pecs</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="12"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-1"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="6.5"></label>
+          </div>
+        </div>
+        <div class="exo" data-name="Crunch avec rotation">
+          <div class="line1"><span class="name">Crunch avec rotation</span><span class="goal">Obliques + centre</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Reps <input class="num xs" data-k="reps" type="number" value="20"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="2-1-2"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="6"></label>
+          </div>
+        </div>
+        <div class="exo core" data-name="Planche + soulèvement bras">
+          <div class="line1"><span class="name">Planche + soulèvement bras</span><span class="goal">Anti-rotation</span></div>
+          <div class="line2 params">
+            <label>Séries <input class="num xs" data-k="sets" type="number" value="3"></label>
+            <label>Temps (s) <input class="num xs" data-k="sec" type="number" value="30"></label>
+            <label>Tempo <input class="num xs" data-k="tempo" type="text" value="statique"></label>
+            <label>RPE <input class="num xs" data-k="rpe" type="number" step="0.5" value="6"></label>
+          </div>
+        </div>
+        <div class="post-training"><strong>Finisher optionnel</strong> — 8 min vélo interval (30/30).</div>
+      </div>
+    </article>
+
+    <!-- SAMEDI -->
+    <article class="day" data-day="6" data-type="cardio">
+      <header><button class="chev" aria-expanded="false">▸</button><h3>🔵 Samedi — Cardio libre / HIIT léger</h3></header>
+      <div class="body hidden">
+        <div class="exo cardio" data-name="Cycling/Tapis fractionné">
+          <div class="line1"><span class="name">Cycling/Tapis fractionné</span><span class="goal">Aérobie + Pic</span></div>
+          <div class="line2 params">
+            <label>Total <input class="num xs" data-k="total" type="number" value="30"></label>
+            <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+            <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+            <label>Bloc <input class="num lg" data-k="bloc" type="text" value="3× (5’ modéré + 1’ rapide)"></label>
+          </div>
+        </div>
+        <div class="exo cardio tibo">
+          <div class="line1"><span class="name">TIBO Extrm</span><span class="goal">Brûle graisse (HIIT guidé)</span></div>
+          <div class="line2 params">
+            <label>Total <input class="num xs" data-k="total" type="number" value="30"></label>
+            <label>WU <input class="num xs" data-k="wu" type="number" value="5"></label>
+            <label>CD <input class="num xs" data-k="cd" type="number" value="5"></label>
+            <label>Bloc <input class="num lg" data-k="bloc" type="text" value="Routine vidéo"></label>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- DIMANCHE -->
+    <article class="day" data-day="0" data-type="off">
+      <header><button class="chev" aria-expanded="false">▸</button><h3>☕ Dimanche — OFF / Récup</h3></header>
+      <div class="body hidden"><p>Sommeil, mobilité douce, hydratation. Respiration nasale 5 min.</p></div>
+    </article>
+  </section>
+
+  <!-- LEXIQUE -->
+  <section class="card" id="lexique">
+    <h2>ℹ️ Lexique</h2>
+    <div class="tabs">
+      <button class="tab active" data-tab="lex-termes">Termes</button>
+      <button class="tab" data-tab="lex-exos">Exercices</button>
+    </div>
+
+    <div id="panel-lex-termes">
+      <ul class="lex">
+        <li><strong>WU</strong> — Warm-Up / Échauffement (≈10% du temps total).</li>
+        <li><strong>CD</strong> — Cool-Down / Retour au calme (≈10%).</li>
+        <li><strong>RPE</strong> — Perception d’effort (6 facile → 10 max).</li>
+        <li><strong>Tempo</strong> — Vitesse d’exécution : ex. <em>2-1-1</em> = 2s descente, 1s pause, 1s montée.</li>
+        <li><strong>LISS</strong> — Cardio doux et continu (Low Intensity Steady State).</li>
+        <li><strong>Z2 / Z3</strong> — Zones cardio modérée / soutenue.</li>
+        <li><strong>PDC</strong> — Poids du corps (sans charge externe).</li>
+        <li><strong>Bloc 4’+1’</strong> — 4 min marche + 1 min run, répété <em>n</em> fois.</li>
+      </ul>
+    </div>
+
+    <div id="panel-lex-exos" class="hidden">
+      <ul class="lex">
+        <li><strong>Développé couché</strong> — Pecs, triceps, épaules antérieures.</li>
+        <li><strong>Goblet squat</strong> — Quads, fessiers, gainage (haltère contre la poitrine).</li>
+        <li><strong>Rowing barre / 1 bras</strong> — Dos, biceps, posture.</li>
+        <li><strong>SDT jambes tendues</strong> — Ischios, fessiers, lombaires.</li>
+        <li><strong>Hip Thrust</strong> — Extension de hanche, fessiers.</li>
+        <li><strong>Élévations latérales</strong> — Épaules latérales.</li>
+        <li><strong>Planche / + bras</strong> — Gainage anti-extension / anti-rotation.</li>
+        <li><strong>Fentes arrière</strong> — Fessiers, cuisses, stabilité.</li>
+        <li><strong>Crunch (variantes)</strong> — Abdominaux (contrôle lombaire).</li>
+        <li><strong>Marche + Run</strong> — Fractionné doux aérobie.</li>
+        <li><strong>TIBO Extrm</strong> — HIIT guidé vidéo (cycles 3’ effort / 3’ récup).</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><small>v4 prototype — moteur adaptatif par type, sauvegarde locale incluse.</small></footer>
+<script src="app.js"></script>
+</body>
+</html>
+
+
