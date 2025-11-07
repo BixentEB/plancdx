@@ -7,92 +7,125 @@
 <link rel="icon" href="/plancdx/addon/img/leaf.png" type="image/png" sizes="96x96">
   <meta name="theme-color" content="#0b0f14">
 <style>
-  :root{
-    --bg:#0b0f14;--panel:#121821;--line:#1f2a3a;
-    --text:#e6edf3;--sub:#9fb2c7;--accent:#58a6ff;--ok:#22c55e;
-    --radius:14px;--shadow:0 8px 24px rgba(0,0,0,.25);
-  }
-  html,body{height:100%}
-  body{
-    margin:0;background:
-      radial-gradient(1200px 800px at 15% -10%, #182131 0%, transparent 60%),
-      radial-gradient(1200px 800px at 120% 0%, #101827 0%, transparent 60%),
-      var(--bg);
-    color:var(--text);
-    font:500 15px/1.5 Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  }
-  .wrap{max-width:1100px;margin:32px auto;padding:0 16px}
-  h1{font-size:22px;margin:0 0 8px}
-  .top{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-bottom:16px}
-  @media (max-width:960px){.top{grid-template-columns:1fr}}
-  .card{background:linear-gradient(180deg,#121a27,#0f1520);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-  .inner{padding:16px 18px}
+ :root{
+  --bg:#0b0f14;--panel:#121821;--line:#1f2a3a;
+  --text:#e6edf3;--sub:#9fb2c7;--accent:#58a6ff;--ok:#22c55e;
+  --radius:14px;--shadow:0 8px 24px rgba(0,0,0,.25);
+}
 
-  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-  .tag{font-size:12px;padding:6px 8px;border-radius:10px;border:1px solid #263750;background:#0f1726;color:#cfe1ff}
+/* Layout & base */
+html,body{height:100%}
+body{
+  margin:0;background:
+    radial-gradient(1200px 800px at 15% -10%, #182131 0%, transparent 60%),
+    radial-gradient(1200px 800px at 120% 0%, #101827 0%, transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font:500 15px/1.5 Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+.wrap{max-width:1100px;margin:32px auto;padding:0 16px}
+h1{font-size:22px;margin:0 0 8px}
+.top{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-bottom:16px}
+@media (max-width:960px){.top{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,#121a27,#0f1520);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.inner{padding:16px 18px}
 
-  .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
-  @media (max-width:720px){.controls{grid-template-columns:1fr}}
-  label{display:block;font-size:12px;color:var(--sub);margin:0 0 6px}
-  input[type=date],select,input[type=time],input[type=password]{width:100%;background:#0e1522;border:1px solid #233045;border-radius:12px;padding:10px;color:#e6edf3}
+/* Tags phase */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.tag{font-size:12px;padding:6px 8px;border-radius:10px;border:1px solid #263750;background:#0f1726;color:#cfe1ff}
 
-  .actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
-  .btn{appearance:none;border:none;border-radius:12px;padding:11px 14px;font-weight:700;letter-spacing:.2px;cursor:pointer}
-  .btn.primary{background:linear-gradient(180deg,#2b72ff,#1a56db);color:#fff;box-shadow:0 6px 16px rgba(35,109,255,.28)}
-  .btn.ok{background:linear-gradient(180deg,#22c55e,#179a46);color:#fff}
-  .btn.secondary{background:#1b2535;color:#e2e8f0;border:1px solid #2a3a53}
-  .btn.ghost{background:transparent;border:1px dashed #2b3d57;color:#a9bed7}
+/* Controls */
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+@media (max-width:720px){.controls{grid-template-columns:1fr}}
+label{display:block;font-size:12px;color:var(--sub);margin:0 0 6px}
+input[type=date],select,input[type=time],input[type=password]{width:100%;background:#0e1522;border:1px solid #233045;border-radius:12px;padding:10px;color:#e6edf3}
 
-  .progress{margin-top:10px;height:12px;background:#0e1522;border:1px solid #22324a;border-radius:999px;overflow:hidden}
-  .bar{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#58a6ff)}
-  .stats{display:flex;gap:14px;margin-top:8px;font-size:13px;color:#9fb2c7}
+/* Buttons */
+.actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.btn{appearance:none;border:none;border-radius:12px;padding:11px 14px;font-weight:700;letter-spacing:.2px;cursor:pointer}
+.btn.primary{background:linear-gradient(180deg,#2b72ff,#1a56db);color:#fff;box-shadow:0 6px 16px rgba(35,109,255,.28)}
+.btn.ok{background:linear-gradient(180deg,#22c55e,#179a46);color:#fff}
+.btn.secondary{background:#1b2535;color:#e2e8f0;border:1px solid #2a3a53}
+.btn.ghost{background:transparent;border:1px dashed #2b3d57;color:#a9bed7}
 
-  /* Agenda */
-  .agenda .ag-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line)}
-  .agenda .title{font-weight:800}
-  .agenda .nav{display:flex;gap:6px}
-  .agenda .navbtn{width:30px;height:30px;border-radius:10px;background:#0f1726;border:1px solid #22324a;color:#cfe1ff;cursor:pointer}
-  .agenda .legend{display:flex;gap:10px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);color:#a9bed7;font-size:12px}
-  .agenda .grid{padding:10px}
-  .week{display:grid;grid-template-columns:28px repeat(7,1fr);gap:6px;margin-bottom:6px}
-  .wcell{display:flex;align-items:center;justify-content:center;font-size:10px;color:#9fb2c7}
-  .cell{height:28px;border-radius:9px;border:1px solid #22324a;background:#0e1522;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
-  .cell.muted{opacity:.45}
-  .cell.sel{outline:2px solid #3b82f6;outline-offset:-2px}
-  .cell.ok{background:var(--ok);color:#03210f;border-color:#1a7b45}
-  .cell.disabled{opacity:.22;filter:grayscale(.6)}
-  .weeknum{font-size:10px;color:#8aa4be}
+/* Progress */
+.progress{margin-top:10px;height:12px;background:#0e1522;border:1px solid #22324a;border-radius:999px;overflow:hidden}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#58a6ff)}
+.stats{display:flex;gap:14px;margin-top:8px;font-size:13px;color:#9fb2c7}
 
-  /* Phases */
-  details.phase{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#0f1726,#0b1220);margin-bottom:12px}
-  details.phase[open]{background:linear-gradient(180deg,#101a31,#0b1323)}
-  .ph-summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
-  .ph-summary::-webkit-details-marker{display:none}
-  .dot{width:10px;height:10px;border-radius:3px}
-  .ph-body{padding:6px 0}
-  .row{display:grid;grid-template-columns:90px 1fr 170px 110px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid #142033}
-  .row:last-child{border-bottom:none}
-  .pill{font-size:11px;padding:3px 8px;border-radius:999px;background:#1a2740;color:#a8c2df;border:1px solid #2a3b5a;display:inline-block}
-  .date{font-size:12px;color:#9fb2c7}
-  .dose{font-size:12px;color:#c6ddf9}
-  .status{display:flex;align-items:center;gap:6px}
-  .square{width:12px;height:12px;border-radius:3px;border:1px solid #22324a;background:#0e1522}
-  .square.ok{background:var(--ok);border-color:#1a7b45}
-  .row.sel{outline:2px solid #2b72ff;outline-offset:-2px;background:linear-gradient(180deg,#0c1830,#0b1426)}
-  .row.today{box-shadow:inset 0 0 0 2px #3b82f6}
-  .row.done{background:linear-gradient(180deg,#0e1f15,#0b1611)}
+/* Agenda */
+.agenda .ag-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line)}
+.agenda .title{font-weight:800}
+.agenda .nav{display:flex;gap:6px}
+.agenda .navbtn{width:30px;height:30px;border-radius:10px;background:#0f1726;border:1px solid #22324a;color:#cfe1ff;cursor:pointer}
+.agenda .legend{display:flex;gap:10px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);color:#a9bed7;font-size:12px}
 
-  /* Collapse “Sauvegarde” propre */
-  details.save{margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#0f1726,#0b1220)}
-  details.save[open] .sv-body{padding-top:6px}
-  .sv-summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--line)}
-  .sv-summary::-webkit-details-marker{display:none}
-  .sv-ic{width:20px;height:20px;border-radius:6px;background:#0e1522;border:1px solid #22324a;display:flex;align-items:center;justify-content:center;color:#9fc1ff;font-weight:900}
-  .sv-body{padding:10px 14px 14px}
-  .savegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  @media (max-width:720px){.savegrid{grid-template-columns:1fr}}
+.week{display:grid;grid-template-columns:28px repeat(7,1fr);gap:6px;margin-bottom:6px}
+.wcell{display:flex;align-items:center;justify-content:center;font-size:10px;color:#9fb2c7}
+.cell{height:28px;border-radius:9px;border:1px solid #22324a;background:#0e1522;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.cell.muted{opacity:.45}
+.cell.sel{outline:2px solid #3b82f6;outline-offset:-2px}
+.cell.ok{background:var(--ok);color:#03210f;border-color:#1a7b45}
+.cell.disabled{opacity:.22;filter:grayscale(.6)}
+.weeknum{font-size:10px;color:#8aa4be}
 
-  .note{font-size:12px;color:#8fb0cf;margin-top:6px}
+/* Repère "aujourd'hui" (agenda) */
+.cell.today{ box-shadow: inset 0 0 0 2px rgba(59,130,246,.25); }
+.cell.sel.today{ box-shadow: none; }
+
+/* Phases */
+details.phase{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#0f1726,#0b1220);margin-bottom:12px}
+details.phase[open]{background:linear-gradient(180deg,#101a31,#0b1323)}
+.ph-summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.ph-summary::-webkit-details-marker{display:none}
+.dot{width:10px;height:10px;border-radius:3px}
+.ph-body{padding:6px 0}
+.row{display:grid;grid-template-columns:90px 1fr 170px 110px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid #142033}
+.row:last-child{border-bottom:none}
+.pill{font-size:11px;padding:3px 8px;border-radius:999px;background:#1a2740;color:#a8c2df;border:1px solid #2a3b5a;display:inline-block}
+.date{font-size:12px;color:#9fb2c7}
+.dose{font-size:12px;color:#c6ddf9}
+.status{display:flex;align-items:center;gap:6px}
+.square{width:12px;height:12px;border-radius:3px;border:1px solid #22324a;background:#0e1522}
+.square.ok{background:var(--ok);border-color:#1a7b45}
+
+/* Sélection réelle dans les phases */
+.row.sel{
+  outline:2px solid #2b72ff;
+  outline-offset:-2px;
+  background:linear-gradient(180deg,#0c1830,#0b1426);
+}
+/* Si le jour est "validé" ET "sélectionné", on garde la sélection */
+.row.sel.done{ background:linear-gradient(180deg,#0c1830,#0b1426); }
+
+/* Repère "aujourd'hui" (phases) */
+.row.today{
+  box-shadow: inset 0 0 0 2px rgba(59,130,246,.25);
+  position:relative;
+}
+.row.today::after{
+  content:""; position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  width:8px; height:8px; border-radius:50%; background:#3b82f6; opacity:.5;
+}
+
+/* Jour validé (fond léger vert, quand non sélectionné) */
+.row.done{ background:linear-gradient(180deg,#0e1f15,#0b1611); }
+
+/* Conflit today+sel : on masque le repère, on garde la sélection */
+.row.sel.today{ box-shadow:none; }
+.row.sel.today::after{ display:none; }
+
+/* Bloc Sauvegarde */
+details.save{margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#0f1726,#0b1220)}
+details.save[open] .sv-body{padding-top:6px}
+.sv-summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--line)}
+.sv-summary::-webkit-details-marker{display:none}
+.sv-ic{width:20px;height:20px;border-radius:6px;background:#0e1522;border:1px solid #22324a;display:flex;align-items:center;justify-content:center;color:#9fc1ff;font-weight:900}
+.sv-body{padding:10px 14px 14px}
+.savegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:720px){.savegrid{grid-template-columns:1fr}}
+
+.note{font-size:12px;color:#8fb0cf;margin-top:6px}
 </style>
 </head>
 <body>
@@ -209,7 +242,7 @@
   ];
   const totalDays = plan.reduce((a,p)=>a+p.days,0);
 
-  /* ---------- Dates ---------- */
+  /* ---------- Utils dates ---------- */
   function normalizeDate(input){
     if(typeof input !== 'string') return null;
     let m = input.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -223,6 +256,7 @@
     return null;
   }
   const pad = n=>String(n).padStart(2,'0');
+  const isSameDay = (a,b)=> a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
 
   /* ---------- Els ---------- */
   const $ = id => document.getElementById(id);
@@ -240,7 +274,7 @@
   /* ---------- State ---------- */
   let state = migrate(load(KEY)) || defaultState();
   let settings = load(KEY_SETTINGS) || { auto:false, day:1, time:'10:00', lastAutoBackup:null };
-  let autoRunningThisSession = false; // anti-rebond dans l’onglet
+  let autoRunningThisSession = false; // anti-rebond
 
   function defaultState(){
     const t = new Date(); const iso = t.toISOString().slice(0,10);
@@ -376,7 +410,7 @@
     rd.readAsArrayBuffer(file);
   });
 
-  /* ---------- Auto-backup (fix “toutes les minutes”) ---------- */
+  /* ---------- Auto-backup hebdo ---------- */
   els.autoOn.checked = !!settings.auto;
   els.autoDay.value = String(settings.day ?? 1);
   els.autoTime.value = settings.time || '10:00';
@@ -386,7 +420,6 @@
   els.autoDay.addEventListener('change', ()=>{ settings.day = parseInt(els.autoDay.value,10); saveSettings(); updateAutoInfo(); });
   els.autoTime.addEventListener('change', ()=>{ settings.time = els.autoTime.value; saveSettings(); updateAutoInfo(); });
 
-  // Vérif 1x/min, + une vérif au chargement
   setInterval(checkAutoBackup, 60*1000);
   setTimeout(checkAutoBackup, 1500);
 
@@ -395,7 +428,7 @@
     if(!settings.auto){ els.autoInfo.textContent = 'Sauvegarde hebdo désactivée.'; return; }
     els.autoInfo.textContent = `Sauvegarde auto : ${labelDay(settings.day)} à ${settings.time}` + (settings.lastAutoBackup?` — dernière : ${new Date(settings.lastAutoBackup).toLocaleString('fr-FR')}`:'');
   }
-  function weekStamp(date){ // ISO semaine
+  function weekStamp(date){
     const d=new Date(date); d.setHours(0,0,0,0);
     const t=new Date(d); const day=(t.getDay()||7); t.setDate(t.getDate()+4-day);
     const yearStart=new Date(t.getFullYear(),0,1);
@@ -403,13 +436,10 @@
     return `${t.getFullYear()}-W${pad(week)}`;
   }
   function slotThisWeek(now){
-    // construit le créneau de cette semaine (lundi=1 … dimanche=0)
     const [hh,mm] = (settings.time||'10:00').split(':').map(x=>+x);
-    // trouve le lundi de la semaine (ISO) :
     const d = new Date(now); d.setHours(0,0,0,0);
-    const day = (d.getDay()||7); // 1..7
+    const day = (d.getDay()||7);
     const monday = new Date(d); monday.setDate(d.getDate() - (day-1));
-    // cible = monday + (settings.day-1) jours (avec Dimanche=0 → +6)
     const offset = (settings.day===0)?6:(settings.day-1);
     const slot = new Date(monday); slot.setDate(monday.getDate()+offset); slot.setHours(hh,mm,0,0);
     return slot;
@@ -419,11 +449,11 @@
     const now = new Date();
     const currentWeek = weekStamp(now);
     const lastWeek = settings.lastAutoBackup ? weekStamp(new Date(settings.lastAutoBackup)) : null;
-    if(lastWeek === currentWeek) return; // déjà fait cette semaine
+    if(lastWeek === currentWeek) return;
 
     const slot = slotThisWeek(now);
     if(now >= slot){
-      autoRunningThisSession = true;           // anti-rebond onglet
+      autoRunningThisSession = true;
       exportData(true);
       settings.lastAutoBackup = Date.now();
       saveSettings(); updateAutoInfo();
@@ -468,6 +498,7 @@
   function renderPhases(){
     $('phases').innerHTML = '';
     let cursor = 1;
+    const today = new Date();
     plan.forEach((p,pi)=>{
       const details = document.createElement('details');
       details.className='phase'; details.id='phase_'+pi; details.open=(pi===phaseIdxForDay(state.selectedDay));
@@ -480,7 +511,7 @@
       const body = document.createElement('div'); body.className='ph-body';
       for(let k=1;k<=p.days;k++){
         const idx = cursor, d = state.days[idx-1];
-        const todayIdx = dayIndexFromDate(new Date());
+        const todayIdx = dayIndexFromDate(today);
         const row = document.createElement('div');
         row.className = 'row'+(d.done?' done':'')+(state.selectedDay===idx?' sel':'')+(todayIdx===idx?' today':'');
         row.innerHTML = `
@@ -518,6 +549,8 @@
 
     const wrap = document.createElement('div'); wrap.appendChild(head);
     let d = new Date(start);
+    const today = new Date();
+
     for(let w=0; w<6; w++){
       const row = document.createElement('div'); row.className='week';
       const wk = document.createElement('div'); wk.className='wcell weeknum'; wk.textContent = isoWeekNumber(d);
@@ -526,8 +559,16 @@
         const cell = document.createElement('div'); cell.className='cell';
         const inMonth = (d.getMonth()===m); if(!inMonth) cell.classList.add('muted');
         const idx = inCureRange(d);
-        if(idx){ if(state.days[idx-1].done) cell.classList.add('ok'); if(state.selectedDay===idx) cell.classList.add('sel'); }
-        else cell.classList.add('disabled');
+
+        // repère today discret
+        if(isSameDay(d,today)) cell.classList.add('today');
+
+        if(idx){
+          if(state.days[idx-1].done) cell.classList.add('ok');
+          if(state.selectedDay===idx) cell.classList.add('sel');
+        } else {
+          cell.classList.add('disabled');
+        }
 
         cell.textContent = d.getDate();
         const clickDate = new Date(d.getTime());
@@ -548,9 +589,20 @@
   els.nextM.addEventListener('click', ()=>{ state.calMonth++; if(state.calMonth>11){ state.calMonth=0; state.calYear++; } save(); renderAgenda(); });
   els.todayM.addEventListener('click', ()=>{ const t=new Date(); state.calYear=t.getFullYear(); state.calMonth=t.getMonth(); save(); renderAgenda(); });
 
+  /* ---------- Refresh auto à minuit (repère today) ---------- */
+  function scheduleMidnightRefresh(){
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(24,0,5,0); // ~5s après minuit
+    const delay = next - now;
+    setTimeout(()=>{ renderAll(); scheduleMidnightRefresh(); }, delay);
+  }
+
   // Init
   renderAll();
+  scheduleMidnightRefresh();
 })();
 </script>
+
 </body>
 </html>
